@@ -1,15 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { routesV1 } from '../configs/app.routes';
 import { CreateProductRequestDto } from './dtos/create-product.request.dto';
 import { IdResponseDto } from './dtos/id.response.dto';
+import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
 import { ProductsService } from './products.service';
 import { RequestProductCreationUseCase } from './use-cases/request-product-creation.use-case';
+import { RequestProductUpdateUseCase } from './use-cases/request-product-update.use-case';
 
 @Controller(routesV1.version)
 export class ProductsHttpController {
   constructor(
     private readonly productsService: ProductsService,
-    private readonly requestProductCreationUseCase: RequestProductCreationUseCase
+    private readonly requestProductCreationUseCase: RequestProductCreationUseCase,
+    private readonly requestProductUpdateUseCase: RequestProductUpdateUseCase
   ) {}
 
   @Post(routesV1.products.root)
@@ -17,7 +20,16 @@ export class ProductsHttpController {
     @Body() createProductRequestDto: CreateProductRequestDto
   ): Promise<IdResponseDto> {
     const productId = await this.requestProductCreationUseCase.execute(createProductRequestDto);
-    return { id: productId.getValue() };
+    return { id: productId.getValue(), message: 'Product creation requested successfully' };
+  }
+
+  @Patch(routesV1.products.update)
+  async updateRequest(
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductRequestDto
+  ): Promise<IdResponseDto> {
+    const productId = await this.requestProductUpdateUseCase.execute(id, updateProductDto);
+    return { id: productId.getValue(), message: 'Product update requested successfully' };
   }
 
   @Get()

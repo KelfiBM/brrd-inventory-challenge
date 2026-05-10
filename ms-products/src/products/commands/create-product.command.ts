@@ -1,8 +1,16 @@
-import { Product } from '../entities/product.entity';
 import { Command } from './command';
 
-export class CreateProductCommand extends Command<Product> {
-  constructor(data: Product, correlationId?: string, timestamp?: Date) {
+type CreateProductData = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  categories: string[];
+  sku: string;
+};
+
+export class CreateProductCommand extends Command<CreateProductData> {
+  constructor(data: CreateProductData, correlationId?: string, timestamp?: Date) {
     if (!data) {
       throw new Error('Data for CreateProductCommand is required');
     }

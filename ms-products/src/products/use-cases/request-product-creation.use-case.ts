@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductCommand } from '../commands/create-product.command';
 import { CreateProductRequestDto } from '../dtos/create-product.request.dto';
-import { Product } from '../entities/product.entity';
 import {
   PRODUCT_EVENT_EMITTER,
   ProductEventEmitterPort,
@@ -25,16 +24,14 @@ export class RequestProductCreationUseCase {
     }
     const nextProductId = await this.productRepository.getNextId();
 
-    const product = Product.create(
-      nextProductId.getValue(),
-      createProductRequestDto.name,
-      createProductRequestDto.description,
-      createProductRequestDto.price,
-      createProductRequestDto.categories,
-      createProductRequestDto.sku
-    );
-
-    const createProductCommand = new CreateProductCommand(product);
+    const createProductCommand = new CreateProductCommand({
+      id: nextProductId.getValue(),
+      name: createProductRequestDto.name,
+      description: createProductRequestDto.description,
+      price: createProductRequestDto.price,
+      categories: createProductRequestDto.categories,
+      sku: createProductRequestDto.sku,
+    });
     await this.productEventEmitter.emitCreateProductCommand(createProductCommand);
     return nextProductId;
   }

@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductCommand } from '../commands/create-product.command';
 import { ProductCreatedEvent } from '../domain-events/product-created.event';
+import { Product } from '../entities/product.entity';
 import {
   PRODUCT_EVENT_EMITTER,
   ProductEventEmitterPort,
 } from '../ports/product.event-emitter.port';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from '../ports/product.repository.port';
+import { ProductId } from '../value-objects/product-id.vo';
 
 @Injectable()
 export class CreateProductUseCase {
@@ -22,20 +24,28 @@ export class CreateProductUseCase {
       throw new Error('No product data provided in the command');
     }
 
+    const productId = new ProductId(data.id);
+
     const existingProduct =
-      (await this.productRepository.findById(data.getId())) ||
-      (await this.productRepository.findBySku(data.getSku()));
+      (await this.productRepository.findById(productId)) ||
+      (await this.productRepository.findBySku(data.sku));
     if (existingProduct) {
-      throw new Error(
-        `Product with ID ${data.getId().getValue()} or SKU ${data.getSku()} already exists.`
-      );
+      throw new Error(`Product with ID ${data.id} or SKU ${data.sku} already exists.`);
     }
 
-    await this.productRepository.save(createProductCommand.data);
+    const newProduct = Product.create(
+      data.id,
+      data.name,
+      data.description,
+      data.price,
+      data.categories,
+      data.sku
+    );
+    const savedProduct = await this.productRepository.save(newProduct);
 
     const productCreatedEvent = new ProductCreatedEvent(
       createProductCommand.metadata.correlationId.getValue(),
-      createProductCommand.data
+      savedProduct
     );
 
     this.productEventEmitter.emitProductCreated(productCreatedEvent);

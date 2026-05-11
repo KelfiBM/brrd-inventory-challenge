@@ -11,10 +11,10 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: [process.env.KAFKA_BROKER],
+        brokers: process.env.EVENT_STREAMING_BROKERS?.split(',') ?? ['localhost:9092'],
       },
       consumer: {
-        groupId: process.env.KAFKA_CONSUMER_GROUP,
+        groupId: process.env.EVENT_STREAMING_CONSUMER_GROUP_ID ?? 'ms-products-group',
       },
     },
   });

@@ -99,5 +99,9 @@ services:
   #     - redis
   #     - postgres-stocks
 
-  # auth:
-  #   build: ./auth
+  auth:
+    build: ./auth
+    ports:
+      - "3002:3000"
+    environment:
+      JWT_SECRET: my_super_secret_jwt_key

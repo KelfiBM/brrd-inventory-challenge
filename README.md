@@ -400,7 +400,7 @@ permitiendo realizar operaciones como agregar, actualizar, eliminar y consultar 
 
 ### Products
 
-- **Default Url**: [http://localhost:8080/api/products](<http://localhost:8080/api/products>)
+- **Default Url**: [http://localhost:3000/api/products](<http://localhost:3000/api/products>)
 - **Base path**: `/api/products`
 - Authentication: Bearer Token
 
@@ -413,7 +413,7 @@ POST /api/products
 ##### cURL
 
 ```curlrc
-curl --location 'http://localhost:8080/api/products' \
+curl --location 'http://localhost:3000/api/products' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer {token}' \
 --data '{
@@ -453,7 +453,7 @@ GET /api/products
 ##### cURL
 
 ```curlrc
-curl --location 'http://localhost:8080/api/products' \
+curl --location 'http://localhost:3000/api/products' \
 --header 'Authorization: Bearer {token}'
 ```
 
@@ -502,7 +502,7 @@ GET /api/products?category=category_name
 ##### cURL
 
 ```curlrc
-curl --location 'http://localhost:8080/api/products?category=category_name' \
+curl --location 'http://localhost:3000/api/products?category=category_name' \
 --header 'Authorization: Bearer {token}'
 ```
 
@@ -551,7 +551,7 @@ GET /api/products/{id_del_producto}
 ##### cURL
 
 ```curlrc
-curl --location --globoff 'http://localhost:8080/api/products/{id_del_producto}' \
+curl --location --globoff 'http://localhost:3000/api/products/{id_del_producto}' \
 --header 'Authorization: Bearer {token}'
 ```
 
@@ -608,7 +608,7 @@ PATCH /api/products/{id_del_producto}
 ##### cURL
 
 ```curlrc
-curl --location --globoff --request PATCH 'http://localhost:8080/api/products/{id_del_producto}' \
+curl --location --globoff --request PATCH 'http://localhost:3000/api/products/{id_del_producto}' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer {token}' \
 --data '{
@@ -642,7 +642,7 @@ DELETE /api/products/{id_del_producto}
 ##### cURL
 
 ```curlrc
-curl --location --globoff --request DELETE 'http://localhost:8080/api/products/{id_del_producto}' \
+curl --location --globoff --request DELETE 'http://localhost:3000/api/products/{id_del_producto}' \
 --header 'Authorization: Bearer {token}'
 ```
 
@@ -661,7 +661,7 @@ curl --location --globoff --request DELETE 'http://localhost:8080/api/products/{
 
 ### Stocks
 
-- **Default Url**: [http://localhost:8080/api/stocks](<http://localhost:8080/api/stocks>)
+- **Default Url**: [http://localhost:3001/api/stocks](<http://localhost:3001/api/stocks>)
 - **Base path**: `/api/stocks`
 - Authentication: Bearer Token
 
@@ -674,7 +674,7 @@ POST /api/stocks/{id_del_producto}/movements
 ##### cURL
 
 ```curlrc
-curl --location --globoff 'http://localhost:8080/api/stocks/{id_del_producto}/movements' \
+curl --location --globoff 'http://localhost:3001/api/stocks/{id_del_producto}/movements' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer {token}' \
 --data '{
@@ -710,7 +710,7 @@ GET /api/stocks/{id_del_producto}
 ##### cURL
 
 ```curlrc
-curl --location --globoff 'http://localhost:8080/api/stocks/{id_del_producto}' \
+curl --location --globoff 'http://localhost:3001/api/stocks/{id_del_producto}' \
 --header 'Authorization: Bearer {token}'
 ```
 
@@ -737,7 +737,7 @@ GET /api/stocks/{id_del_producto}/movements
 ##### cURL
 
 ```curlrc
-curl --location --globoff 'http://localhost:8080/api/stocks/{id_del_producto}/movements' \
+curl --location --globoff 'http://localhost:3001/api/stocks/{id_del_producto}/movements' \
 --header 'Authorization: Bearer {token}'
 ```
 
@@ -767,7 +767,7 @@ curl --location --globoff 'http://localhost:8080/api/stocks/{id_del_producto}/mo
 
 ### Auth
 
-- **Default Url**: [http://localhost:8080/auth](<http://localhost:8080/auth>)
+- **Default Url**: [http://localhost:3002/auth](<http://localhost:3002/auth>)
 - **Base path**: `/auth`
 - Authentication: No requerida
 
@@ -780,7 +780,7 @@ POST /auth/signin
 ##### cURL
 
 ```curlrc
-curl --location 'http://localhost:8080/auth/signin' \
+curl --location 'http://localhost:3002/auth/signin' \
 --header 'Content-Type: application/json' \
 --data '{
     "username": "username",
@@ -792,7 +792,7 @@ curl --location 'http://localhost:8080/auth/signin' \
 
 ```json
 {
-  "username": "user_user",
+  "username": "user_admin",
   "password": "hashed_password"
 }
 ```

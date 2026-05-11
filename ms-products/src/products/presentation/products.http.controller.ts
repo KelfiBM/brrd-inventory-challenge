@@ -9,16 +9,16 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { routesV1 } from '../configs/app.routes';
-import { FindAllProductsUseCase } from './application/use-cases/find-all-products.use-case';
-import { FindOneProductUseCase } from './application/use-cases/find-one-product.use-case';
-import { RequestProductCreationUseCase } from './application/use-cases/request-product-creation.use-case';
-import { RequestProductDeletionUseCase } from './application/use-cases/request-product-deletion.use-case';
-import { RequestProductUpdateUseCase } from './application/use-cases/request-product-update.use-case';
-import { Currency } from './domain/value-objects/currency.vo';
-import { Price } from './domain/value-objects/price.vo';
-import { ProductCategory } from './domain/value-objects/product-category.vo';
-import { ProductId } from './domain/value-objects/product-id.vo';
+import { routesV1 } from '../../configs/app.routes';
+import { FindAllProductsUseCase } from '../application/use-cases/find-all-products.use-case';
+import { FindOneProductUseCase } from '../application/use-cases/find-one-product.use-case';
+import { RequestProductCreationUseCase } from '../application/use-cases/request-product-creation.use-case';
+import { RequestProductDeletionUseCase } from '../application/use-cases/request-product-deletion.use-case';
+import { RequestProductUpdateUseCase } from '../application/use-cases/request-product-update.use-case';
+import { Currency } from '../domain/value-objects/currency.vo';
+import { Price } from '../domain/value-objects/price.vo';
+import { ProductCategory } from '../domain/value-objects/product-category.vo';
+import { ProductId } from '../domain/value-objects/product-id.vo';
 import { CreateProductRequestDto } from './dtos/create-product.request.dto';
 import { FindProductResponseDto } from './dtos/find-product.response.dto';
 import { IdResponseDto } from './dtos/id.response.dto';

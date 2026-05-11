@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { ProductUpdatedEvent } from '../../domain-events/product-updated.event';
+import { ProductUpdatedEvent } from '../../domain/events/product-updated.event';
 
 import { Price } from '../../domain/value-objects/price.vo';
 import { ProductCategory } from '../../domain/value-objects/product-category.vo';

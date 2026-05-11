@@ -1,6 +1,6 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { ProductCreatedEvent } from '../../domain-events/product-created.event';
 import { Product } from '../../domain/entities/product.entity';
+import { ProductCreatedEvent } from '../../domain/events/product-created.event';
 
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 import { ProductConfigPort } from '../ports/product.config.port';

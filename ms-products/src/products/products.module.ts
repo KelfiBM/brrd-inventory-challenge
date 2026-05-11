@@ -8,8 +8,8 @@ import { RequestProductDeletionUseCase } from './application/use-cases/request-p
 import { RequestProductUpdateUseCase } from './application/use-cases/request-product-update.use-case';
 import { InvalidateCacheUseCase } from './application/use-cases/update-cache.use-case';
 import { UpdateProductUseCase } from './application/use-cases/update-product.use-case';
-import { ProductsEventController } from './products.event.controller';
-import { ProductsHttpController } from './products.http.controller';
+import { ProductsEventController } from './presentation/products.event.controller';
+import { ProductsHttpController } from './presentation/products.http.controller';
 
 const controllers = [ProductsHttpController, ProductsEventController];
 const useCases = [

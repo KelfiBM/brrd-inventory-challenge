@@ -1,19 +1,19 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { CommandNames, DomainEventNames } from '../configs/app.events';
-import { routesV1 } from '../configs/app.routes';
-import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
-import { DeleteProductUseCase } from './application/use-cases/delete-product.use-case';
-import { InvalidateCacheUseCase } from './application/use-cases/update-cache.use-case';
-import { UpdateProductUseCase } from './application/use-cases/update-product.use-case';
-import { CreateProductCommand } from './commands/create-product.command';
-import { DeleteProductCommand } from './commands/delete-product.command';
-import { UpdateProductCommand } from './commands/update-product.command';
-import { DomainEvent } from './domain-events/domain-event';
-import { Product } from './domain/entities/product.entity';
-import { Price } from './domain/value-objects/price.vo';
-import { ProductCategory } from './domain/value-objects/product-category.vo';
-import { ProductId } from './domain/value-objects/product-id.vo';
+import { CommandNames, DomainEventNames } from '../../configs/app.events';
+import { routesV1 } from '../../configs/app.routes';
+import { CreateProductUseCase } from '../application/use-cases/create-product.use-case';
+import { DeleteProductUseCase } from '../application/use-cases/delete-product.use-case';
+import { InvalidateCacheUseCase } from '../application/use-cases/update-cache.use-case';
+import { UpdateProductUseCase } from '../application/use-cases/update-product.use-case';
+import { CreateProductCommand } from '../commands/create-product.command';
+import { DeleteProductCommand } from '../commands/delete-product.command';
+import { UpdateProductCommand } from '../commands/update-product.command';
+import { Product } from '../domain/entities/product.entity';
+import { DomainEvent } from '../domain/events/domain-event';
+import { Price } from '../domain/value-objects/price.vo';
+import { ProductCategory } from '../domain/value-objects/product-category.vo';
+import { ProductId } from '../domain/value-objects/product-id.vo';
 
 @Controller(routesV1.version)
 export class ProductsEventController {

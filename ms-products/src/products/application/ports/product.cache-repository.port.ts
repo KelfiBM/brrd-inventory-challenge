@@ -7,6 +7,9 @@ export interface ProductCacheRepositoryPort {
   findById(id: ProductId): Promise<Product>;
   save(product: Product): Promise<Product>;
   remove(id: ProductId): Promise<void>;
+
+  getExchangeRateTable(forCurrency: string): Promise<{ [currency: string]: number }>;
+  saveExchangeRateTable(forCurrency: string, rates: { [currency: string]: number }): Promise<void>;
 }
 
 export const PRODUCT_CACHE_REPOSITORY = Symbol('PRODUCT_CACHE_REPOSITORY_PORT');

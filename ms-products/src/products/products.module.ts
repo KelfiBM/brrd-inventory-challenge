@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PRODUCT_LOGGER } from './application/ports/product.logger.port';
@@ -40,8 +41,10 @@ const adapters = [
   },
 ];
 
+const imports = [ConfigModule.forFeature(productsConfig), HttpModule];
+
 @Module({
-  imports: [ConfigModule.forFeature(productsConfig)],
+  imports: [...imports],
   controllers: [...controllers],
   providers: [...useCases, ...adapters],
 })

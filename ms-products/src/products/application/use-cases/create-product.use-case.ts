@@ -63,7 +63,7 @@ export class CreateProductUseCase {
       createProductDto.price,
       createProductDto.categories,
       createProductDto.sku,
-      this.productConfig.defaultCurrency
+      this.productConfig.defaultCurrency()
     );
     const savedProduct = await this.productRepository.save(newProduct);
 

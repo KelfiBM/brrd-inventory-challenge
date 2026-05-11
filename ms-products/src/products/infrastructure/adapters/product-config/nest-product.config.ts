@@ -8,8 +8,14 @@ export class NestProductConfig implements ProductConfigPort {
   constructor(
     @Inject(productsConfig.KEY)
     private readonly productConfig: ConfigType<typeof productsConfig>
-  ) {
-    this.defaultCurrency = this.productConfig.defaultCurrency;
+  ) {}
+  exchangeRateApiUrl(): string {
+    return this.productConfig.exchangeRateApiUrl;
   }
-  defaultCurrency: string;
+  exchangeRateApiKey(): string {
+    return this.productConfig.exchangeRateApiKey;
+  }
+  defaultCurrency(): string {
+    return this.productConfig.defaultCurrency;
+  }
 }

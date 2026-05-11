@@ -1,10 +1,11 @@
-import { CallHandler, ExecutionContext, Inject, NestInterceptor } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Request } from 'express';
 import { createHash } from 'node:crypto';
 import { map, Observable, of } from 'rxjs';
-import { CACHE_MANAGER } from '../../../../configs/app.const';
 
+@Injectable()
 export class ProductIdempotencyInterceptor implements NestInterceptor {
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 

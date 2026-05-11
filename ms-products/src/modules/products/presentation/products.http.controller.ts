@@ -8,9 +8,11 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { routesV1 } from '../../../configs/app.routes';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 import { FindAllProductsUseCase } from '../application/use-cases/find-all-products.use-case';
 import { FindOneProductUseCase } from '../application/use-cases/find-one-product.use-case';
 import { RequestProductCreationUseCase } from '../application/use-cases/request-product-creation.use-case';
@@ -27,6 +29,7 @@ import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
 import { ProductIdempotencyInterceptor } from './interceptors/product-idempotency.interceptor';
 
 @Controller(routesV1.version)
+@UseGuards(AuthGuard)
 export class ProductsHttpController {
   constructor(
     private readonly requestProductCreationUseCase: RequestProductCreationUseCase,

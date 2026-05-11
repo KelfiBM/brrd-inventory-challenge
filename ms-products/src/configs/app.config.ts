@@ -22,6 +22,9 @@ type AppConfig = {
   cache: {
     url: string;
   };
+  auth: {
+    jwtSecret: string;
+  };
 };
 
 export default registerAs('app', (): AppConfig => {
@@ -36,6 +39,7 @@ export default registerAs('app', (): AppConfig => {
     EVENT_STREAMING_CLIENT_ID: Joi.string().required(),
     EVENT_STREAMING_CONSUMER_GROUP_ID: Joi.string().required(),
     CACHE_URL: Joi.string().required(),
+    JWT_SECRET: Joi.string().required(),
   });
 
   const { error, value: envVars } = appSchema.validate(process.env, {
@@ -71,6 +75,9 @@ export default registerAs('app', (): AppConfig => {
     },
     cache: {
       url: envVars.CACHE_URL,
+    },
+    auth: {
+      jwtSecret: envVars.JWT_SECRET,
     },
   };
   return value;

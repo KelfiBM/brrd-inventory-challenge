@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './configs/app.config';
+import { AuthModule } from './modules/auth/auth.module';
 import { CacheManagerModule } from './modules/cache-manager/cache-manager.module';
 import { EventStreamingModule } from './modules/event-streaming/event-streaming.module';
 import { ProductsModule } from './modules/products/products.module';
@@ -29,6 +30,7 @@ import { ProductsModule } from './modules/products/products.module';
     CacheManagerModule,
     ProductsModule,
     EventStreamingModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

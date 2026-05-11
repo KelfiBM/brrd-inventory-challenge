@@ -1,2 +1,1 @@
 export const EVENT_STREAMING_CLIENT = Symbol('EVENT_STREAMING_CLIENT');
-export const CACHE_MANAGER = Symbol('CACHE_MANAGER');

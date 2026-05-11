@@ -2,6 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from '../auth/auth.module';
 import { CacheManagerModule } from '../cache-manager/cache-manager.module';
 import { EventStreamingModule } from '../event-streaming/event-streaming.module';
 import { CURRENCY_CONVERTER } from './application/ports/currency-converter.port';
@@ -27,8 +28,18 @@ import { NestProductEventEmitter } from './infrastructure/adapters/product-event
 import { NestProductLogger } from './infrastructure/adapters/product-logger/nest.product.logger';
 import { ProductSchema } from './infrastructure/adapters/product-repository/type-orm-product-repository/schema/product.schema';
 import { TypeOrmProductRepository } from './infrastructure/adapters/product-repository/type-orm-product-repository/type-orm-product.repository';
+import { ProductIdempotencyInterceptor } from './presentation/interceptors/product-idempotency.interceptor';
 import { ProductsEventController } from './presentation/products.event.controller';
 import { ProductsHttpController } from './presentation/products.http.controller';
+
+const imports = [
+  ConfigModule.forFeature(productsConfig),
+  HttpModule,
+  TypeOrmModule.forFeature([ProductSchema]),
+  EventStreamingModule,
+  CacheManagerModule,
+  AuthModule,
+];
 
 const controllers = [ProductsHttpController, ProductsEventController];
 const useCases = [
@@ -70,16 +81,10 @@ const adapters = [
   },
 ];
 
-const providers = [...useCases, ...adapters];
+const providers = [...useCases, ...adapters, ProductIdempotencyInterceptor];
 
 @Module({
-  imports: [
-    ConfigModule.forFeature(productsConfig),
-    HttpModule,
-    TypeOrmModule.forFeature([ProductSchema]),
-    EventStreamingModule,
-    CacheManagerModule,
-  ],
+  imports: [...imports],
   controllers: [...controllers],
   providers: [...providers],
 })

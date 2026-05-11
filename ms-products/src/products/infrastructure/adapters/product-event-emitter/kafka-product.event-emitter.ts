@@ -1,6 +1,5 @@
 import { Inject } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
-import { CommandNames, DomainEventNames } from '../../../../configs/app.events';
 import { ProductEventEmitterPort } from '../../../application/ports/product.event-emitter.port';
 import { CreateProductCommand } from '../../../commands/create-product.command';
 import { DeleteProductCommand } from '../../../commands/delete-product.command';
@@ -8,6 +7,7 @@ import { UpdateProductCommand } from '../../../commands/update-product.command';
 import { ProductCreatedEvent } from '../../../domain/events/product-created.event';
 import { ProductDeletedEvent } from '../../../domain/events/product-deleted.event';
 import { ProductUpdatedEvent } from '../../../domain/events/product-updated.event';
+import { CommandNames, DomainEventNames } from '../../../products.consts';
 
 export const KAFKA_PRODUCT_EVENT_EMITTER = Symbol('KAFKA_PRODUCT_EVENT_EMITTER');
 

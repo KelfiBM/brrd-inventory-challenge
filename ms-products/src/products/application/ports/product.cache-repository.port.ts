@@ -4,7 +4,7 @@ import { ProductId } from '../../domain/value-objects/product-id.vo';
 export interface ProductCacheRepositoryPort {
   findAll(): Promise<Product[]>;
   findByCategory(category: string): Promise<Product[]>;
-  findById(id: ProductId): Promise<Product>;
+  findById(id: ProductId): Promise<Product | null>;
   save(product: Product): Promise<Product>;
   remove(id: ProductId): Promise<void>;
 

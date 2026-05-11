@@ -4,6 +4,7 @@ export interface ProductConfigPort {
   exchangeRateApiKey(): string;
   kafkaBroker(): string;
   kafkaConsumerGroup(): string;
+  redisUrl(): string;
 }
 
 export const PRODUCT_CONFIG = Symbol('PRODUCT_CONFIG');

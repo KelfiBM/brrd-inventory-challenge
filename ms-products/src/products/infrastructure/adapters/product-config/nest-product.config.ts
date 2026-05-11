@@ -9,6 +9,9 @@ export class NestProductConfig implements ProductConfigPort {
     @Inject(productsConfig.KEY)
     private readonly productConfig: ConfigType<typeof productsConfig>
   ) {}
+  redisUrl(): string {
+    return this.productConfig.redisUrl;
+  }
   kafkaBroker(): string {
     return this.productConfig.kafkaBroker;
   }

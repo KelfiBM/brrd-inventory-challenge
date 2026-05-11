@@ -1,12 +1,34 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { ProductsModule } from '@products/products.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule, ConfigType } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import appConfig from './configs/app.config';
+import { CacheManagerModule } from './modules/cache-manager/cache-manager.module';
+import { EventStreamingModule } from './modules/event-streaming/event-streaming.module';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), ProductsModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [appConfig],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [appConfig.KEY],
+      useFactory: (config: ConfigType<typeof appConfig>) => ({
+        type: 'postgres',
+        host: config.database.postgres.host,
+        port: config.database.postgres.port,
+        username: config.database.postgres.username,
+        password: config.database.postgres.password,
+        database: config.database.postgres.database,
+        entities: [],
+        synchronize: config.database.postgres.synchronize,
+      }),
+    }),
+    CacheManagerModule,
+    ProductsModule,
+    EventStreamingModule,
+  ],
 })
 export class AppModule {}

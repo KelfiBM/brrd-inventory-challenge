@@ -6,5 +6,6 @@ export const routesV1 = {
     root: productsRoot,
     update: `${productsRoot}/:id`,
     delete: `${productsRoot}/:id`,
+    getById: `${productsRoot}/:id`,
   },
 };

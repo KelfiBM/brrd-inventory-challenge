@@ -8,7 +8,7 @@ export interface ProductRepositoryPort {
   saveAll(products: Product[]): Promise<void>;
   findByCategory(category: ProductCategory): Promise<Product[]>;
   saveByCategory(category: ProductCategory, products: Product[]): Promise<void>;
-  findById(id: ProductId): Promise<Product>;
+  findById(id: ProductId, includePriceHistory?: boolean): Promise<Product>;
   findBySku(sku: string): Promise<Product>;
   save(product: Product): Promise<Product>;
   remove(id: ProductId): Promise<void>;

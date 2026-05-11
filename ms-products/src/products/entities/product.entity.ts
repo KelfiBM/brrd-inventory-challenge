@@ -106,6 +106,10 @@ export class Product {
     return this.currency;
   }
 
+  getPriceHistory(): PriceHistoryEntry[] {
+    return this.priceHistory;
+  }
+
   updateName(newName: string) {
     Product.ensureValidName(newName);
     this.name = newName;

@@ -8,10 +8,11 @@ import {
 import { PRODUCT_LOGGER, ProductLoggerPort } from '../ports/product.logger.port';
 
 @Injectable()
-export class UpdateCacheUseCase {
+export class InvalidateCacheUseCase {
   constructor(
+    @Optional()
     @Inject(PRODUCT_CACHE_REPOSITORY)
-    private readonly productCacheRepository: ProductCacheRepositoryPort,
+    private readonly productCacheRepository?: ProductCacheRepositoryPort,
 
     @Optional()
     @Inject(PRODUCT_LOGGER)
@@ -19,9 +20,13 @@ export class UpdateCacheUseCase {
   ) {}
 
   async execute(domainEvent: DomainEvent<Product>): Promise<void> {
-    this.logger?.verbose('Executing UpdateCacheUseCase with event: {DomainEvent}', domainEvent);
+    if (!this.productCacheRepository) {
+      this.logger?.verbose('No cache repository available, skipping cache invalidation.');
+      return;
+    }
+    this.logger?.verbose('Executing InvalidateCacheUseCase with event: {DomainEvent}', domainEvent);
     const product = domainEvent.data;
     await this.productCacheRepository.remove(product.getId());
-    this.logger?.log(`Product with ID ${product.getId().getValue()} removed from cache.`);
+    this.logger?.verbose(`Product with ID ${product.getId().getValue()} removed from cache.`);
   }
 }

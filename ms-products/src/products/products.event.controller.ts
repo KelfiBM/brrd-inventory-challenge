@@ -9,7 +9,7 @@ import { DomainEvent } from './domain-events/domain-event';
 import { Product } from './entities/product.entity';
 import { CreateProductUseCase } from './use-cases/create-product.use-case';
 import { DeleteProductUseCase } from './use-cases/delete-product.use-case';
-import { UpdateCacheUseCase } from './use-cases/update-cache.use-case';
+import { InvalidateCacheUseCase } from './use-cases/update-cache.use-case';
 import { UpdateProductUseCase } from './use-cases/update-product.use-case';
 
 @Controller(routesV1.version)
@@ -18,7 +18,7 @@ export class ProductsEventController {
     private readonly createProductUseCase: CreateProductUseCase,
     private readonly updateProductUseCase: UpdateProductUseCase,
     private readonly deleteProductUseCase: DeleteProductUseCase,
-    private readonly updateCacheUseCase: UpdateCacheUseCase
+    private readonly updateCacheUseCase: InvalidateCacheUseCase
   ) {}
 
   @EventPattern(CommandNames.CREATE_PRODUCT)
@@ -41,7 +41,7 @@ export class ProductsEventController {
     DomainEventNames.PRODUCT_UPDATED,
     DomainEventNames.PRODUCT_DELETED,
   ])
-  async handleUpdateCacheEvent(@Payload() productEvent: DomainEvent<Product>) {
+  async handleInvalidateCacheEvent(@Payload() productEvent: DomainEvent<Product>) {
     await this.updateCacheUseCase.execute(productEvent);
   }
 }

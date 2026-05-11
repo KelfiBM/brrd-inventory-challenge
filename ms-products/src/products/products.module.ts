@@ -3,6 +3,7 @@ import { ProductsEventController } from './products.event.controller';
 import { ProductsHttpController } from './products.http.controller';
 import { CreateProductUseCase } from './use-cases/create-product.use-case';
 import { DeleteProductUseCase } from './use-cases/delete-product.use-case';
+import { FindAllProductsUseCase } from './use-cases/find-all-products.use-case';
 import { RequestProductCreationUseCase } from './use-cases/request-product-creation.use-case';
 import { RequestProductDeletionUseCase } from './use-cases/request-product-deletion.use-case';
 import { RequestProductUpdateUseCase } from './use-cases/request-product-update.use-case';
@@ -18,6 +19,7 @@ const useCases = [
   DeleteProductUseCase,
   UpdateProductUseCase,
   UpdateCacheUseCase,
+  FindAllProductsUseCase,
 ];
 
 @Module({

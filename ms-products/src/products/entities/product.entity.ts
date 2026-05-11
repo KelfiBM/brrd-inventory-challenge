@@ -1,3 +1,4 @@
+import { Currency } from '../value-objects/currency.vo';
 import { Price } from '../value-objects/price.vo';
 import { ProductCategory } from '../value-objects/product-category.vo';
 import { ProductId } from '../value-objects/product-id.vo';
@@ -13,6 +14,7 @@ export class Product {
     private name: string,
     private description: string,
     private price: Price,
+    private readonly currency: Currency,
     private categories: ProductCategory[],
     private readonly sku: string,
     private readonly priceHistory: PriceHistoryEntry[] = [],
@@ -26,7 +28,8 @@ export class Product {
     description: string,
     price: number,
     categories: string[],
-    sku: string
+    sku: string,
+    currency: string = 'DOP'
   ): Product {
     Product.ensureValidName(name);
     Product.ensureValidCategories(categories);
@@ -40,6 +43,7 @@ export class Product {
       name,
       description,
       new Price(price),
+      new Currency(currency),
       productCategories,
       sku,
       [{ price: new Price(price), changedAt: now }],
@@ -49,8 +53,8 @@ export class Product {
   }
 
   private static ensureValidName(name: string) {
-    if (!name || name.trim() === '' || name.length < 3) {
-      throw new Error('Product name must be at least 3 characters long');
+    if (!name || name.trim() === '') {
+      throw new Error('Product name must be a non-empty string');
     }
   }
 
@@ -96,6 +100,10 @@ export class Product {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
+  }
+
+  getCurrency(): Currency {
+    return this.currency;
   }
 
   updateName(newName: string) {

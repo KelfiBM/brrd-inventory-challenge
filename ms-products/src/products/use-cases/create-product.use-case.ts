@@ -2,6 +2,7 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CreateProductCommand } from '../commands/create-product.command';
 import { ProductCreatedEvent } from '../domain-events/product-created.event';
 import { Product } from '../entities/product.entity';
+import { ProductConfigPort } from '../ports/product.config.port';
 import {
   PRODUCT_EVENT_EMITTER,
   ProductEventEmitterPort,
@@ -17,6 +18,8 @@ export class CreateProductUseCase {
     private readonly productRepository: ProductRepositoryPort,
     @Inject(PRODUCT_EVENT_EMITTER)
     private readonly productEventEmitter: ProductEventEmitterPort,
+    @Inject('PRODUCT_CONFIG')
+    private readonly productConfig: ProductConfigPort,
 
     @Optional()
     @Inject(PRODUCT_LOGGER)
@@ -47,7 +50,8 @@ export class CreateProductUseCase {
       data.description,
       data.price,
       data.categories,
-      data.sku
+      data.sku,
+      this.productConfig.defaultCurrency
     );
     const savedProduct = await this.productRepository.save(newProduct);
 

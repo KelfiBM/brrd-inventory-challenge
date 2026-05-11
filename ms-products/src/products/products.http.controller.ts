@@ -1,18 +1,23 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { routesV1 } from '../configs/app.routes';
 import { CreateProductRequestDto } from './dtos/create-product.request.dto';
+import { FindProductsResponseDto } from './dtos/find-products.response.dto';
 import { IdResponseDto } from './dtos/id.response.dto';
 import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
+import { FindAllProductsUseCase } from './use-cases/find-all-products.use-case';
 import { RequestProductCreationUseCase } from './use-cases/request-product-creation.use-case';
 import { RequestProductDeletionUseCase } from './use-cases/request-product-deletion.use-case';
 import { RequestProductUpdateUseCase } from './use-cases/request-product-update.use-case';
+import { Currency } from './value-objects/currency.vo';
+import { ProductCategory } from './value-objects/product-category.vo';
 
 @Controller(routesV1.version)
 export class ProductsHttpController {
   constructor(
     private readonly requestProductCreationUseCase: RequestProductCreationUseCase,
     private readonly requestProductUpdateUseCase: RequestProductUpdateUseCase,
-    private readonly requestProductDeletionUseCase: RequestProductDeletionUseCase
+    private readonly requestProductDeletionUseCase: RequestProductDeletionUseCase,
+    private readonly findAllProductsUseCase: FindAllProductsUseCase
   ) {}
 
   @Post(routesV1.products.root)
@@ -38,9 +43,16 @@ export class ProductsHttpController {
     return { id: productId.getValue(), message: 'Product deletion requested successfully' };
   }
 
-  @Get()
-  findAllRequest() {
-    throw new Error('Method not implemented yet');
+  @Get(routesV1.products.root)
+  async findAllRequest(
+    @Query('currency') currency?: string,
+    @Query('category') category?: string
+  ): Promise<FindProductsResponseDto[]> {
+    const products = await this.findAllProductsUseCase.execute({
+      currency: currency ? new Currency(currency) : undefined,
+      category: category ? new ProductCategory(category) : undefined,
+    });
+    return products;
   }
 
   @Get(':id')

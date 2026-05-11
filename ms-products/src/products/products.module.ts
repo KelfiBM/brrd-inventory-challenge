@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PRODUCT_LOGGER } from './application/ports/product.logger.port';
 import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
 import { DeleteProductUseCase } from './application/use-cases/delete-product.use-case';
 import { FindAllProductsUseCase } from './application/use-cases/find-all-products.use-case';
@@ -8,8 +10,11 @@ import { RequestProductDeletionUseCase } from './application/use-cases/request-p
 import { RequestProductUpdateUseCase } from './application/use-cases/request-product-update.use-case';
 import { InvalidateCacheUseCase } from './application/use-cases/update-cache.use-case';
 import { UpdateProductUseCase } from './application/use-cases/update-product.use-case';
+import { NestProductConfig } from './infrastructure/adapters/product-config/nest-product.config';
+import { NestProductLogger } from './infrastructure/adapters/product-logger/nest-product.logger';
 import { ProductsEventController } from './presentation/products.event.controller';
 import { ProductsHttpController } from './presentation/products.http.controller';
+import productsConfig from './products.config';
 
 const controllers = [ProductsHttpController, ProductsEventController];
 const useCases = [
@@ -24,8 +29,20 @@ const useCases = [
   FindOneProductUseCase,
 ];
 
+const adapters = [
+  {
+    provide: PRODUCT_LOGGER,
+    useClass: NestProductLogger,
+  },
+  {
+    provide: 'PRODUCT_CONFIG',
+    useClass: NestProductConfig,
+  },
+];
+
 @Module({
+  imports: [ConfigModule.forFeature(productsConfig)],
   controllers: [...controllers],
-  providers: [...useCases],
+  providers: [...useCases, ...adapters],
 })
 export class ProductsModule {}

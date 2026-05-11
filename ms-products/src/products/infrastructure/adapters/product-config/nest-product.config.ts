@@ -9,6 +9,12 @@ export class NestProductConfig implements ProductConfigPort {
     @Inject(productsConfig.KEY)
     private readonly productConfig: ConfigType<typeof productsConfig>
   ) {}
+  kafkaBroker(): string {
+    return this.productConfig.kafkaBroker;
+  }
+  kafkaConsumerGroup(): string {
+    return this.productConfig.kafkaConsumerGroup;
+  }
   exchangeRateApiUrl(): string {
     return this.productConfig.exchangeRateApiUrl;
   }

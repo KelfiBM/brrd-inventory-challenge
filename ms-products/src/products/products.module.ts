@@ -1,6 +1,8 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { PRODUCT_CONFIG, ProductConfigPort } from './application/ports/product.config.port';
 import { PRODUCT_LOGGER } from './application/ports/product.logger.port';
 import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
 import { DeleteProductUseCase } from './application/use-cases/delete-product.use-case';
@@ -12,6 +14,7 @@ import { RequestProductUpdateUseCase } from './application/use-cases/request-pro
 import { InvalidateCacheUseCase } from './application/use-cases/update-cache.use-case';
 import { UpdateProductUseCase } from './application/use-cases/update-product.use-case';
 import { NestProductConfig } from './infrastructure/adapters/product-config/nest-product.config';
+import { KAFKA_PRODUCT_EVENT_EMITTER } from './infrastructure/adapters/product-event-emitter/kafka-product.event-emitter';
 import { NestProductLogger } from './infrastructure/adapters/product-logger/nest-product.logger';
 import { ProductsEventController } from './presentation/products.event.controller';
 import { ProductsHttpController } from './presentation/products.http.controller';
@@ -36,12 +39,33 @@ const adapters = [
     useClass: NestProductLogger,
   },
   {
-    provide: 'PRODUCT_CONFIG',
+    provide: PRODUCT_CONFIG,
     useClass: NestProductConfig,
   },
 ];
 
-const imports = [ConfigModule.forFeature(productsConfig), HttpModule];
+const imports = [
+  ConfigModule.forFeature(productsConfig),
+  HttpModule,
+  ClientsModule.registerAsync([
+    {
+      inject: [PRODUCT_CONFIG],
+      name: KAFKA_PRODUCT_EVENT_EMITTER,
+      useFactory: async (config: ProductConfigPort) => ({
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            id: 'products',
+            brokers: [config.kafkaBroker()],
+          },
+          consumer: {
+            groupId: config.kafkaConsumerGroup(),
+          },
+        },
+      }),
+    },
+  ]),
+];
 
 @Module({
   imports: [...imports],

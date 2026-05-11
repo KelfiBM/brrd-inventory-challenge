@@ -70,6 +70,8 @@ const adapters = [
   },
 ];
 
+const providers = [...useCases, ...adapters];
+
 @Module({
   imports: [
     ConfigModule.forFeature(productsConfig),
@@ -79,6 +81,6 @@ const adapters = [
     CacheManagerModule,
   ],
   controllers: [...controllers],
-  providers: [...useCases, ...adapters],
+  providers: [...providers],
 })
 export class ProductsModule {}

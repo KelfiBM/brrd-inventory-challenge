@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { routesV1 } from '../../../configs/app.routes';
 import { FindAllProductsUseCase } from '../application/use-cases/find-all-products.use-case';
@@ -23,6 +24,7 @@ import { CreateProductRequestDto } from './dtos/create-product.request.dto';
 import { FindProductResponseDto } from './dtos/find-product.response.dto';
 import { IdResponseDto } from './dtos/id.response.dto';
 import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
+import { ProductIdempotencyInterceptor } from './interceptors/product-idempotency.interceptor';
 
 @Controller(routesV1.version)
 export class ProductsHttpController {
@@ -34,6 +36,7 @@ export class ProductsHttpController {
     private readonly findOneProductUseCase: FindOneProductUseCase
   ) {}
 
+  @UseInterceptors(ProductIdempotencyInterceptor)
   @Post(routesV1.products.root)
   async requestCreate(
     @Body() createProductRequestDto: CreateProductRequestDto
@@ -42,6 +45,7 @@ export class ProductsHttpController {
     return { id: productId.getValue(), message: 'Product creation requested successfully' };
   }
 
+  @UseInterceptors(ProductIdempotencyInterceptor)
   @Patch(routesV1.products.update)
   async updateRequest(
     @Param('id') id: string,
@@ -59,6 +63,7 @@ export class ProductsHttpController {
     return { id: productId.getValue(), message: 'Product update requested successfully' };
   }
 
+  @UseInterceptors(ProductIdempotencyInterceptor)
   @Delete(routesV1.products.delete)
   async removeRequest(@Param('id') id: string) {
     const productId = await this.requestProductDeletionUseCase.execute({ id: new ProductId(id) });

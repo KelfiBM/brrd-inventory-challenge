@@ -546,7 +546,7 @@ GET /api/products/{id_del_producto}
 | Nombre | Valor | Descripcion |
 |--------|-------|-------------|
 | currency | Currency code de ISO 4217. Por ejemplo: USD, DOP, CAD | Obtener el precio del producto convertido a la moneda solicitada |
-| price_history | true | Incluir el historico de precios del producto |
+| priceHistory | true | Incluir el historico de precios del producto |
 
 ##### cURL
 
@@ -585,7 +585,7 @@ curl --location --globoff 'http://localhost:8080/api/products/{id_del_producto}'
     "categories": ["category_name", "other_category"],
     "sku": "PROD-A-001",
     "currency": "DOP",
-    "price_history": [
+    "priceHistory": [
       {
         "date": "2024-01-01",
         "price": 24.99

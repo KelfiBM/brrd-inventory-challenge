@@ -1,0 +1,23 @@
+{
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "bracketSameLine": false,
+  "bracketSpacing": true,
+  "endOfLine": "lf",
+  "trailingComma": "es5",
+  "arrowParens": "always",
+  "jsxSingleQuote": false,
+  "singleAttributePerLine": false,
+  "importOrder": [
+    "^react",
+    "^@core/(.*)$",
+    "^@server/(.*)$",
+    "^@ui/(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}

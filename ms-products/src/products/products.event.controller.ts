@@ -3,10 +3,12 @@ import { EventPattern, Payload } from '@nestjs/microservices';
 import { CommandNames, DomainEventNames } from '../configs/app.events';
 import { routesV1 } from '../configs/app.routes';
 import { CreateProductCommand } from './commands/create-product.command';
+import { DeleteProductCommand } from './commands/delete-product.command';
 import { UpdateProductCommand } from './commands/update-product.command';
 import { DomainEvent } from './domain-events/domain-event';
 import { Product } from './entities/product.entity';
 import { CreateProductUseCase } from './use-cases/create-product.use-case';
+import { DeleteProductUseCase } from './use-cases/delete-product.use-case';
 import { UpdateCacheUseCase } from './use-cases/update-cache.use-case';
 import { UpdateProductUseCase } from './use-cases/update-product.use-case';
 
@@ -15,6 +17,7 @@ export class ProductsEventController {
   constructor(
     private readonly createProductUseCase: CreateProductUseCase,
     private readonly updateProductUseCase: UpdateProductUseCase,
+    private readonly deleteProductUseCase: DeleteProductUseCase,
     private readonly updateCacheUseCase: UpdateCacheUseCase
   ) {}
 
@@ -28,7 +31,16 @@ export class ProductsEventController {
     await this.updateProductUseCase.execute(updateProductCommand);
   }
 
-  @EventPattern([DomainEventNames.PRODUCT_CREATED, DomainEventNames.PRODUCT_UPDATED])
+  @EventPattern(CommandNames.DELETE_PRODUCT)
+  async handleDeleteProductCommand(@Payload() deleteProductCommand: DeleteProductCommand) {
+    await this.deleteProductUseCase.execute(deleteProductCommand);
+  }
+
+  @EventPattern([
+    DomainEventNames.PRODUCT_CREATED,
+    DomainEventNames.PRODUCT_UPDATED,
+    DomainEventNames.PRODUCT_DELETED,
+  ])
   async handleUpdateCacheEvent(@Payload() productEvent: DomainEvent<Product>) {
     await this.updateCacheUseCase.execute(productEvent);
   }

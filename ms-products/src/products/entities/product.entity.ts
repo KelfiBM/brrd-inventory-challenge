@@ -2,6 +2,11 @@ import { Price } from '../value-objects/price.vo';
 import { ProductCategory } from '../value-objects/product-category.vo';
 import { ProductId } from '../value-objects/product-id.vo';
 
+type PriceHistoryEntry = {
+  price: Price;
+  changedAt: Date;
+};
+
 export class Product {
   private constructor(
     private readonly id: ProductId,
@@ -10,6 +15,7 @@ export class Product {
     private price: Price,
     private categories: ProductCategory[],
     private readonly sku: string,
+    private readonly priceHistory: PriceHistoryEntry[] = [],
     private readonly createdAt: Date,
     private updatedAt: Date
   ) {}
@@ -36,6 +42,7 @@ export class Product {
       new Price(price),
       productCategories,
       sku,
+      [{ price: new Price(price), changedAt: now }],
       now,
       now
     );
@@ -103,8 +110,10 @@ export class Product {
   }
 
   updatePrice(newPrice: number) {
+    const oldPrice = this.price;
     this.price = new Price(newPrice);
     this.updatedAt = new Date();
+    this.priceHistory.push({ price: oldPrice, changedAt: this.updatedAt });
   }
 
   updateCategories(newCategories: string[]) {

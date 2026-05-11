@@ -792,7 +792,7 @@ curl --location 'http://localhost:8080/auth/signin' \
 
 ```json
 {
-  "username": "user_user",
+  "username": "user_admin",
   "password": "hashed_password"
 }
 ```

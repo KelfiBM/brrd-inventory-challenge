@@ -12,7 +12,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { routesV1 } from '../../../configs/app.routes';
-import { AuthGuard } from '../../auth/guards/auth.guard';
 import { FindAllProductsUseCase } from '../application/use-cases/find-all-products.use-case';
 import { FindOneProductUseCase } from '../application/use-cases/find-one-product.use-case';
 import { RequestProductCreationUseCase } from '../application/use-cases/request-product-creation.use-case';
@@ -22,10 +21,13 @@ import { Currency } from '../domain/value-objects/currency.vo';
 import { Price } from '../domain/value-objects/price.vo';
 import { ProductCategory } from '../domain/value-objects/product-category.vo';
 import { ProductId } from '../domain/value-objects/product-id.vo';
+import { Roles } from './decorators/usre-role.decorator';
 import { CreateProductRequestDto } from './dtos/create-product.request.dto';
 import { FindProductResponseDto } from './dtos/find-product.response.dto';
 import { IdResponseDto } from './dtos/id.response.dto';
 import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
+import { Role } from './enum/role.enum';
+import { AuthGuard } from './guards/auth.guard';
 import { ProductIdempotencyInterceptor } from './interceptors/product-idempotency.interceptor';
 
 @Controller(routesV1.version)
@@ -40,6 +42,7 @@ export class ProductsHttpController {
   ) {}
 
   @UseInterceptors(ProductIdempotencyInterceptor)
+  @Roles(Role.Admin)
   @Post(routesV1.products.root)
   async requestCreate(
     @Body() createProductRequestDto: CreateProductRequestDto
@@ -49,6 +52,7 @@ export class ProductsHttpController {
   }
 
   @UseInterceptors(ProductIdempotencyInterceptor)
+  @Roles(Role.Admin)
   @Patch(routesV1.products.update)
   async updateRequest(
     @Param('id') id: string,
@@ -67,6 +71,7 @@ export class ProductsHttpController {
   }
 
   @UseInterceptors(ProductIdempotencyInterceptor)
+  @Roles(Role.Admin)
   @Delete(routesV1.products.delete)
   async removeRequest(@Param('id') id: string) {
     const productId = await this.requestProductDeletionUseCase.execute({ id: new ProductId(id) });

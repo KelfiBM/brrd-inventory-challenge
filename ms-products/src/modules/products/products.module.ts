@@ -28,6 +28,8 @@ import { NestProductEventEmitter } from './infrastructure/adapters/product-event
 import { NestProductLogger } from './infrastructure/adapters/product-logger/nest.product.logger';
 import { ProductSchema } from './infrastructure/adapters/product-repository/type-orm-product-repository/schema/product.schema';
 import { TypeOrmProductRepository } from './infrastructure/adapters/product-repository/type-orm-product-repository/type-orm-product.repository';
+import { AuthGuard } from './presentation/guards/auth.guard';
+import { RolesGuard } from './presentation/guards/role.guard';
 import { ProductIdempotencyInterceptor } from './presentation/interceptors/product-idempotency.interceptor';
 import { ProductsEventController } from './presentation/products.event.controller';
 import { ProductsHttpController } from './presentation/products.http.controller';
@@ -81,7 +83,7 @@ const adapters = [
   },
 ];
 
-const providers = [...useCases, ...adapters, ProductIdempotencyInterceptor];
+const providers = [...useCases, ...adapters, ProductIdempotencyInterceptor, RolesGuard, AuthGuard];
 
 @Module({
   imports: [...imports],

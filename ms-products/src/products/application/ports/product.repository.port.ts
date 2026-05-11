@@ -1,6 +1,6 @@
-import { Product } from '../entities/product.entity';
-import { ProductCategory } from '../value-objects/product-category.vo';
-import { ProductId } from '../value-objects/product-id.vo';
+import { Product } from '../../domain/entities/product.entity';
+import { ProductCategory } from '../../domain/value-objects/product-category.vo';
+import { ProductId } from '../../domain/value-objects/product-id.vo';
 
 export interface ProductRepositoryPort {
   getNextId(): Promise<ProductId>;

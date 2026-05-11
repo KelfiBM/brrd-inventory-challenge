@@ -1,12 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateProductCommand } from '../commands/create-product.command';
-import { CreateProductRequestDto } from '../dtos/create-product.request.dto';
+import { CreateProductCommand } from '../../commands/create-product.command';
+import { ProductId } from '../../domain/value-objects/product-id.vo';
 import {
   PRODUCT_EVENT_EMITTER,
   ProductEventEmitterPort,
 } from '../ports/product.event-emitter.port';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from '../ports/product.repository.port';
-import { ProductId } from '../value-objects/product-id.vo';
+
+type RequestProductCreationDto = {
+  name: string;
+  description: string;
+  price: number;
+  categories: string[];
+  sku: string;
+};
 
 @Injectable()
 export class RequestProductCreationUseCase {
@@ -17,8 +24,8 @@ export class RequestProductCreationUseCase {
     private readonly productEventEmitter: ProductEventEmitterPort
   ) {}
 
-  async execute(createProductRequestDto: CreateProductRequestDto): Promise<ProductId> {
-    const existingProduct = await this.productRepository.findBySku(createProductRequestDto.sku);
+  async execute(requestProductCreationDto: RequestProductCreationDto): Promise<ProductId> {
+    const existingProduct = await this.productRepository.findBySku(requestProductCreationDto.sku);
     if (existingProduct) {
       throw new Error('Product with the same SKU already exists');
     }
@@ -26,11 +33,11 @@ export class RequestProductCreationUseCase {
 
     const createProductCommand = new CreateProductCommand({
       id: nextProductId.getValue(),
-      name: createProductRequestDto.name,
-      description: createProductRequestDto.description,
-      price: createProductRequestDto.price,
-      categories: createProductRequestDto.categories,
-      sku: createProductRequestDto.sku,
+      name: requestProductCreationDto.name,
+      description: requestProductCreationDto.description,
+      price: requestProductCreationDto.price,
+      categories: requestProductCreationDto.categories,
+      sku: requestProductCreationDto.sku,
     });
     await this.productEventEmitter.emitCreateProductCommand(createProductCommand);
     return nextProductId;

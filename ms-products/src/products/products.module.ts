@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
+import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
+import { DeleteProductUseCase } from './application/use-cases/delete-product.use-case';
+import { FindAllProductsUseCase } from './application/use-cases/find-all-products.use-case';
+import { FindOneProductUseCase } from './application/use-cases/find-one-product.use-case';
+import { RequestProductCreationUseCase } from './application/use-cases/request-product-creation.use-case';
+import { RequestProductDeletionUseCase } from './application/use-cases/request-product-deletion.use-case';
+import { RequestProductUpdateUseCase } from './application/use-cases/request-product-update.use-case';
+import { InvalidateCacheUseCase } from './application/use-cases/update-cache.use-case';
+import { UpdateProductUseCase } from './application/use-cases/update-product.use-case';
 import { ProductsEventController } from './products.event.controller';
 import { ProductsHttpController } from './products.http.controller';
-import { CreateProductUseCase } from './use-cases/create-product.use-case';
-import { DeleteProductUseCase } from './use-cases/delete-product.use-case';
-import { FindAllProductsUseCase } from './use-cases/find-all-products.use-case';
-import { FindOneProductUseCase } from './use-cases/find-one-product.use-case';
-import { RequestProductCreationUseCase } from './use-cases/request-product-creation.use-case';
-import { RequestProductDeletionUseCase } from './use-cases/request-product-deletion.use-case';
-import { RequestProductUpdateUseCase } from './use-cases/request-product-update.use-case';
-import { InvalidateCacheUseCase } from './use-cases/update-cache.use-case';
-import { UpdateProductUseCase } from './use-cases/update-product.use-case';
 
 const controllers = [ProductsHttpController, ProductsEventController];
 const useCases = [

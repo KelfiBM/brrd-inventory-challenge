@@ -1,11 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { FindProductResponseDto } from '../dtos/find-product.response.dto';
-import { FindProductsRequestDto } from '../dtos/find-products.request.dto';
-import { Product } from '../entities/product.entity';
+import { Product } from '../../domain/entities/product.entity';
+import { Currency } from '../../domain/value-objects/currency.vo';
+import { Price } from '../../domain/value-objects/price.vo';
+import { ProductCategory } from '../../domain/value-objects/product-category.vo';
 import { CURRENCY_CONVERTER, CurrencyConverterPort } from '../ports/currency-converter.port';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from '../ports/product.repository.port';
-import { Currency } from '../value-objects/currency.vo';
-import { Price } from '../value-objects/price.vo';
+import { FindProductResponse } from '../types/find-product.response.type';
+
+type FindAllProductsRequestDto = {
+  currency?: Currency;
+  category?: ProductCategory;
+};
 
 @Injectable()
 export class FindAllProductsUseCase {
@@ -16,32 +21,32 @@ export class FindAllProductsUseCase {
     private readonly currencyConverter: CurrencyConverterPort
   ) {}
 
-  async execute(findProductsRequestDto: FindProductsRequestDto): Promise<FindProductResponseDto[]> {
-    const products = await this.findProducts(findProductsRequestDto);
+  async execute(
+    findAllProductsRequestDto: FindAllProductsRequestDto
+  ): Promise<FindProductResponse[]> {
+    const products = await this.findProducts(findAllProductsRequestDto);
 
-    if (findProductsRequestDto.currency) {
-      return this.convertCurrency(products, findProductsRequestDto.currency);
+    if (findAllProductsRequestDto.currency) {
+      return this.convertCurrency(products, findAllProductsRequestDto.currency);
     }
 
     return products.map((product) => this.mapResponse(product));
   }
 
-  private async findProducts(findProductsRequestDto: FindProductsRequestDto): Promise<Product[]> {
-    if (findProductsRequestDto.category) {
-      return this.productRepository.findByCategory(findProductsRequestDto.category);
+  private async findProducts(
+    findAllProductsRequestDto: FindAllProductsRequestDto
+  ): Promise<Product[]> {
+    if (findAllProductsRequestDto.category) {
+      return this.productRepository.findByCategory(findAllProductsRequestDto.category);
     }
     return this.productRepository.findAll();
   }
 
-  private mapResponse(
-    product: Product,
-    currency?: Currency,
-    price?: Price
-  ): FindProductResponseDto {
+  private mapResponse(product: Product, currency?: Currency, price?: Price): FindProductResponse {
     return {
       currency: currency ? currency.getValue() : product.getCurrency().getValue(),
       sku: product.getSku(),
-      categories: product.getCategories().map((product) => product.getValue()),
+      categories: product.getCategories().map((category) => category.getValue()),
       name: product.getName(),
       id: product.getId().getValue(),
       description: product.getDescription(),
@@ -52,9 +57,9 @@ export class FindAllProductsUseCase {
   private async convertCurrency(
     products: Product[],
     targetCurrency: Currency
-  ): Promise<FindProductResponseDto[]> {
+  ): Promise<FindProductResponse[]> {
     return await Promise.all(
-      products.map(async (product): Promise<FindProductResponseDto> => {
+      products.map(async (product): Promise<FindProductResponse> => {
         return this.mapResponse(
           product,
           targetCurrency,

@@ -1,13 +1,17 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { DeleteProductCommand } from '../commands/delete-product.command';
-import { ProductDeletedEvent } from '../domain-events/product-deleted.event';
+import { ProductDeletedEvent } from '../../domain-events/product-deleted.event';
+import { ProductId } from '../../domain/value-objects/product-id.vo';
 import {
   PRODUCT_EVENT_EMITTER,
   ProductEventEmitterPort,
 } from '../ports/product.event-emitter.port';
 import { PRODUCT_LOGGER, ProductLoggerPort } from '../ports/product.logger.port';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from '../ports/product.repository.port';
-import { ProductId } from '../value-objects/product-id.vo';
+
+type DeleteProductDto = {
+  correlationId: string;
+  id: ProductId;
+};
 
 @Injectable()
 export class DeleteProductUseCase {
@@ -22,33 +26,31 @@ export class DeleteProductUseCase {
     private readonly logger?: ProductLoggerPort
   ) {}
 
-  async execute(deleteProductCommand: DeleteProductCommand): Promise<void> {
+  async execute(deleteProductDto: DeleteProductDto): Promise<void> {
     this.logger?.verbose(
       'Executing DeleteProductUseCase with command: {DeleteProductCommand}',
-      deleteProductCommand
+      deleteProductDto
     );
-    const data = deleteProductCommand.data;
-    if (!data) {
+    if (!deleteProductDto) {
       this.logger?.warn('DeleteProductCommand executed without data');
       return;
     }
 
-    const productId = new ProductId(data.id);
-    const existingProduct = await this.productRepository.findById(productId);
+    const existingProduct = await this.productRepository.findById(deleteProductDto.id);
 
     if (!existingProduct) {
-      this.logger?.warn(`Product with ID ${productId.getValue()} does not exist.`);
+      this.logger?.warn(`Product with ID ${deleteProductDto.id.getValue()} does not exist.`);
       return;
     }
 
-    await this.productRepository.remove(productId);
+    await this.productRepository.remove(deleteProductDto.id);
 
     const productDeletedEvent = new ProductDeletedEvent(
-      deleteProductCommand.metadata.correlationId.getValue(),
+      deleteProductDto.correlationId,
       existingProduct
     );
 
     this.productEventEmitter.emitProductDeleted(productDeletedEvent);
-    this.logger?.log(`Product with ID ${productId.getValue()} deleted successfully.`);
+    this.logger?.log(`Product with ID ${deleteProductDto.id.getValue()} deleted successfully.`);
   }
 }

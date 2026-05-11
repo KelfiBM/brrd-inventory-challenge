@@ -1,4 +1,4 @@
-import { CorrelationId } from '../value-objects/correlation-id.vo';
+import { CorrelationId } from '../domain/value-objects/correlation-id.vo';
 
 type DomainEventMetadata = {
   correlationId: CorrelationId;

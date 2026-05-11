@@ -1,5 +1,5 @@
-import { Currency } from '../value-objects/currency.vo';
-import { ProductCategory } from '../value-objects/product-category.vo';
+import { Currency } from '../domain/value-objects/currency.vo';
+import { ProductCategory } from '../domain/value-objects/product-category.vo';
 
 export class FindProductsRequestDto {
   currency?: Currency;

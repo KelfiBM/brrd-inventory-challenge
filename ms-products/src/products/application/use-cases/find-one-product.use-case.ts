@@ -1,11 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { FindOneProductRequestDto } from '../dtos/find-one-product.request';
-import { FindProductResponseDto } from '../dtos/find-product.response.dto';
-import { Product } from '../entities/product.entity';
+import { Product } from '../../domain/entities/product.entity';
+import { Currency } from '../../domain/value-objects/currency.vo';
+import { Price } from '../../domain/value-objects/price.vo';
+import { ProductId } from '../../domain/value-objects/product-id.vo';
 import { CURRENCY_CONVERTER, CurrencyConverterPort } from '../ports/currency-converter.port';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from '../ports/product.repository.port';
-import { Currency } from '../value-objects/currency.vo';
-import { Price } from '../value-objects/price.vo';
+import { FindProductResponse } from '../types/find-product.response.type';
+
+type FindOneProductRequestDto = {
+  id: ProductId;
+  currency?: Currency;
+  includePriceHistory?: boolean;
+};
 
 @Injectable()
 export class FindOneProductUseCase {
@@ -16,9 +22,7 @@ export class FindOneProductUseCase {
     private readonly currencyConverter: CurrencyConverterPort
   ) {}
 
-  async execute(
-    findOneProductRequestDto: FindOneProductRequestDto
-  ): Promise<FindProductResponseDto> {
+  async execute(findOneProductRequestDto: FindOneProductRequestDto): Promise<FindProductResponse> {
     const product = await this.findProduct(findOneProductRequestDto);
 
     if (findOneProductRequestDto.currency) {
@@ -45,7 +49,7 @@ export class FindOneProductUseCase {
     currency?: Currency,
     price?: Price,
     priceHistory?: { price: Price; date: Date }[]
-  ): FindProductResponseDto {
+  ): FindProductResponse {
     const categories = product.getCategories().map((category) => category.getValue());
     const priceValue = price ? price.getValue() : product.getPrice().getValue();
     const currencyValue = currency ? currency.getValue() : product.getCurrency().getValue();
@@ -76,7 +80,7 @@ export class FindOneProductUseCase {
   private async convertCurrency(
     product: Product,
     targetCurrency: Currency
-  ): Promise<FindProductResponseDto> {
+  ): Promise<FindProductResponse> {
     const mainPrice = new Price(
       await this.currencyConverter.convert(
         product.getPrice().getValue(),

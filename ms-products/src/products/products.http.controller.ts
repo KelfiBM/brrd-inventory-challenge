@@ -10,18 +10,19 @@ import {
   Query,
 } from '@nestjs/common';
 import { routesV1 } from '../configs/app.routes';
+import { FindAllProductsUseCase } from './application/use-cases/find-all-products.use-case';
+import { FindOneProductUseCase } from './application/use-cases/find-one-product.use-case';
+import { RequestProductCreationUseCase } from './application/use-cases/request-product-creation.use-case';
+import { RequestProductDeletionUseCase } from './application/use-cases/request-product-deletion.use-case';
+import { RequestProductUpdateUseCase } from './application/use-cases/request-product-update.use-case';
+import { Currency } from './domain/value-objects/currency.vo';
+import { Price } from './domain/value-objects/price.vo';
+import { ProductCategory } from './domain/value-objects/product-category.vo';
+import { ProductId } from './domain/value-objects/product-id.vo';
 import { CreateProductRequestDto } from './dtos/create-product.request.dto';
 import { FindProductResponseDto } from './dtos/find-product.response.dto';
 import { IdResponseDto } from './dtos/id.response.dto';
 import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
-import { FindAllProductsUseCase } from './use-cases/find-all-products.use-case';
-import { FindOneProductUseCase } from './use-cases/find-one-product.use-case';
-import { RequestProductCreationUseCase } from './use-cases/request-product-creation.use-case';
-import { RequestProductDeletionUseCase } from './use-cases/request-product-deletion.use-case';
-import { RequestProductUpdateUseCase } from './use-cases/request-product-update.use-case';
-import { Currency } from './value-objects/currency.vo';
-import { ProductCategory } from './value-objects/product-category.vo';
-import { ProductId } from './value-objects/product-id.vo';
 
 @Controller(routesV1.version)
 export class ProductsHttpController {
@@ -46,13 +47,21 @@ export class ProductsHttpController {
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductRequestDto
   ): Promise<IdResponseDto> {
-    const productId = await this.requestProductUpdateUseCase.execute(id, updateProductDto);
+    const productId = await this.requestProductUpdateUseCase.execute({
+      id: new ProductId(id),
+      name: updateProductDto.name,
+      description: updateProductDto.description,
+      price: updateProductDto.price ? new Price(updateProductDto.price) : undefined,
+      categories: updateProductDto.categories
+        ? updateProductDto.categories.map((cat) => new ProductCategory(cat))
+        : undefined,
+    });
     return { id: productId.getValue(), message: 'Product update requested successfully' };
   }
 
   @Delete(routesV1.products.delete)
   async removeRequest(@Param('id') id: string) {
-    const productId = await this.requestProductDeletionUseCase.execute(id);
+    const productId = await this.requestProductDeletionUseCase.execute({ id: new ProductId(id) });
     return { id: productId.getValue(), message: 'Product deletion requested successfully' };
   }
 
@@ -65,7 +74,17 @@ export class ProductsHttpController {
       currency: currency ? new Currency(currency) : undefined,
       category: category ? new ProductCategory(category) : undefined,
     });
-    return products;
+    return products.map(
+      (product): FindProductResponseDto => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        categories: product.categories,
+        sku: product.sku,
+        currency: product.currency,
+      })
+    );
   }
 
   @Get(routesV1.products.getById)
@@ -79,6 +98,15 @@ export class ProductsHttpController {
       currency: currency ? new Currency(currency) : undefined,
       includePriceHistory: priceHistory ?? false,
     });
-    return product;
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      categories: product.categories,
+      sku: product.sku,
+      currency: product.currency,
+      priceHistory: product.priceHistory,
+    };
   }
 }

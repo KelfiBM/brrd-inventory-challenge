@@ -1,4 +1,4 @@
-import { Currency } from '../value-objects/currency.vo';
+import { Currency } from '../../domain/value-objects/currency.vo';
 
 export interface CurrencyConverterPort {
   convert(amount: number, fromCurrency: Currency, toCurrency: Currency): Promise<number>;

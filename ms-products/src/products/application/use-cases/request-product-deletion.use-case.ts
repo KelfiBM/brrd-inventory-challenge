@@ -1,11 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DeleteProductCommand } from '../commands/delete-product.command';
+import { DeleteProductCommand } from '../../commands/delete-product.command';
+import { ProductId } from '../../domain/value-objects/product-id.vo';
+
 import {
   PRODUCT_EVENT_EMITTER,
   ProductEventEmitterPort,
 } from '../ports/product.event-emitter.port';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from '../ports/product.repository.port';
-import { ProductId } from '../value-objects/product-id.vo';
+
+type RequestProductDeletionDto = {
+  id: ProductId;
+};
 
 @Injectable()
 export class RequestProductDeletionUseCase {
@@ -16,11 +21,11 @@ export class RequestProductDeletionUseCase {
     private readonly productEventEmitter: ProductEventEmitterPort
   ) {}
 
-  async execute(id: string): Promise<ProductId> {
-    const productId = new ProductId(id);
+  async execute(requestProductDeletionDto: RequestProductDeletionDto): Promise<ProductId> {
+    const productId = requestProductDeletionDto.id;
     const existingProduct = await this.productRepository.findById(productId);
     if (!existingProduct) {
-      throw new Error(`Product with ID ${id} not found.`);
+      throw new Error(`Product with ID ${productId.getValue()} not found.`);
     }
 
     const deleteProductCommand = new DeleteProductCommand({

@@ -1,5 +1,5 @@
-import { Product } from '../entities/product.entity';
-import { ProductId } from '../value-objects/product-id.vo';
+import { Product } from '../../domain/entities/product.entity';
+import { ProductId } from '../../domain/value-objects/product-id.vo';
 
 export interface ProductCacheRepositoryPort {
   findAll(): Promise<Product[]>;

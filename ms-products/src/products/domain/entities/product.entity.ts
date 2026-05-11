@@ -32,10 +32,10 @@ export class Product {
     currency: string = 'DOP'
   ): Product {
     Product.ensureValidName(name);
-    Product.ensureValidCategories(categories);
     Product.ensureValidSku(sku);
 
     const productCategories = categories.map((cat) => new ProductCategory(cat));
+    Product.ensureValidCategories(productCategories);
     const now = new Date();
 
     return new Product(
@@ -58,7 +58,7 @@ export class Product {
     }
   }
 
-  private static ensureValidCategories(categories: string[]) {
+  private static ensureValidCategories(categories: ProductCategory[]) {
     if (!categories || categories.length === 0) {
       throw new Error('Product must have at least one category');
     }
@@ -121,16 +121,16 @@ export class Product {
     this.updatedAt = new Date();
   }
 
-  updatePrice(newPrice: number) {
+  updatePrice(newPrice: Price) {
     const oldPrice = this.price;
-    this.price = new Price(newPrice);
+    this.price = newPrice;
     this.updatedAt = new Date();
     this.priceHistory.push({ price: oldPrice, changedAt: this.updatedAt });
   }
 
-  updateCategories(newCategories: string[]) {
+  updateCategories(newCategories: ProductCategory[]) {
     Product.ensureValidCategories(newCategories);
-    this.categories = newCategories.map((cat) => new ProductCategory(cat));
+    this.categories = newCategories;
     this.updatedAt = new Date();
   }
 }

@@ -23,6 +23,10 @@ export class UpdateProductUseCase {
   ) {}
 
   async execute(updateProductCommand: UpdateProductCommand): Promise<void> {
+    this.logger?.verbose(
+      'Executing UpdateProductUseCase with command: {UpdateProductCommand}',
+      updateProductCommand
+    );
     const data = updateProductCommand.data;
     if (!data) {
       this.logger?.warn('UpdateProductCommand executed without data');
@@ -50,5 +54,6 @@ export class UpdateProductUseCase {
     );
 
     this.productEventEmitter.emitProductUpdated(productUpdatedEvent);
+    this.logger?.log(`Product with ID ${productId.getValue()} updated successfully.`);
   }
 }

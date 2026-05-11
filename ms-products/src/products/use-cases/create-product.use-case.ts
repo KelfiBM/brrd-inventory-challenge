@@ -24,6 +24,7 @@ export class CreateProductUseCase {
   ) {}
 
   async execute(createProductCommand: CreateProductCommand): Promise<void> {
+    this.logger?.verbose('Executing CreateProductUseCase with command:', createProductCommand);
     const data = createProductCommand.data;
     if (!data) {
       this.logger?.warn('CreateProductCommand executed without data');
@@ -56,5 +57,6 @@ export class CreateProductUseCase {
     );
 
     this.productEventEmitter.emitProductCreated(productCreatedEvent);
+    this.logger?.verbose('Product created successfully:', savedProduct);
   }
 }

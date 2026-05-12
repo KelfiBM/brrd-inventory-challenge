@@ -24,6 +24,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
     healthcheck:
       test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 30s
@@ -44,10 +45,12 @@ services:
       DYNAMIC_CONFIG_ENABLED: 'true'
 
   redis:
-    image: redis
+    image: redis/redis-stack:latest
     restart: always
     ports:
-      - "6379:6379"
+      - "6379:6379"   # Redis server port
+      - "8001:8001"   # RedisInsight UI port
+      
 
   postgres:
     image: postgres:latest

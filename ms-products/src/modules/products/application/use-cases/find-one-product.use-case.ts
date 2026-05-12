@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Product } from '../../domain/entities/product.entity';
+import { ProductNotFoundError } from '../../domain/errors/product-not-found.error';
 import { Currency } from '../../domain/value-objects/currency.vo';
 import { Price } from '../../domain/value-objects/price.vo';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
@@ -25,6 +26,10 @@ export class FindOneProductUseCase {
   async execute(findOneProductRequestDto: FindOneProductRequestDto): Promise<FindProductResponse> {
     const product = await this.findProduct(findOneProductRequestDto);
 
+    if (!product) {
+      throw new ProductNotFoundError(`Product with ID ${findOneProductRequestDto.id.getValue()} not found.`, findOneProductRequestDto.id.getValue());
+    }
+
     if (findOneProductRequestDto.currency) {
       return this.convertCurrency(product, findOneProductRequestDto.currency);
     }
@@ -36,14 +41,11 @@ export class FindOneProductUseCase {
     return response;
   }
 
-  private async findProduct(findOneProductRequestDto: FindOneProductRequestDto): Promise<Product> {
+  private async findProduct(findOneProductRequestDto: FindOneProductRequestDto): Promise<Product | null> {
     const product = await this.productRepository.findById(
       findOneProductRequestDto.id,
       findOneProductRequestDto.includePriceHistory
     );
-    if (!product) {
-      throw new Error(`Product with ID ${findOneProductRequestDto.id.getValue()} not found`);
-    }
 
     return product;
   }

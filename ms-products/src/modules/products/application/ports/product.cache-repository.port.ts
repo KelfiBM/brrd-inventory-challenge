@@ -1,13 +1,11 @@
 import { ProductId } from '@products/domain/value-objects/product-id.vo';
-import { ProductDbEntity } from '../../infrastructure/adapters/product-repository/type-orm-product-repository/schema/product.db-entity';
+import { ProductDbEntity } from '../../infrastructure/adapters/product-repository/type-orm-product-repository/entities/product.db-entity';
 
 export interface ProductCacheRepositoryPort {
   findAll(): Promise<ProductDbEntity[]>;
   saveAll(products: ProductDbEntity[]): Promise<void>;
-  delAll(): Promise<void>;
   findByCategory(category: string): Promise<ProductDbEntity[]>;
   saveByCategory(category: string, products: ProductDbEntity[]): Promise<void>;
-  delByCategory(): Promise<void>;
   findById(id: ProductId): Promise<ProductDbEntity | null>;
   save(product: ProductDbEntity): Promise<ProductDbEntity>;
   remove(id: ProductId): Promise<void>;

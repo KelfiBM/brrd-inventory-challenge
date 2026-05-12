@@ -6,8 +6,8 @@ export interface ProductRepositoryPort {
   getNextId(): Promise<ProductId>;
   findAll(): Promise<Product[]>;
   findByCategory(category: ProductCategory): Promise<Product[]>;
-  findById(id: ProductId, includePriceHistory?: boolean): Promise<Product>;
-  findBySku(sku: string): Promise<Product>;
+  findById(id: ProductId, includePriceHistory?: boolean): Promise<Product | null>;
+  findBySku(sku: string): Promise<Product | null>;
   save(product: Product): Promise<Product>;
   remove(id: ProductId): Promise<void>;
 }

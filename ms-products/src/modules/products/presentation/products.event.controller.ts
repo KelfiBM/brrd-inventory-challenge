@@ -8,6 +8,7 @@ import { CreateProductCommand } from '../commands/create-product.command';
 import { DeleteProductCommand } from '../commands/delete-product.command';
 import { UpdateProductCommand } from '../commands/update-product.command';
 import { CommandNames } from '../configs/products.consts';
+import { CorrelationId } from '../domain/value-objects/correlation-id.vo';
 import { Price } from '../domain/value-objects/price.vo';
 import { ProductCategory } from '../domain/value-objects/product-category.vo';
 import { ProductId } from '../domain/value-objects/product-id.vo';
@@ -25,15 +26,29 @@ export class ProductsEventController {
     if (!createProductCommand?.data) {
       return;
     }
-
+    let price: Price;
+    let categories: ProductCategory[];
+    let id: ProductId;
+    let correlationId: CorrelationId;
+    
+    try {
+      price = new Price(createProductCommand.data.price);
+      categories = createProductCommand.data.categories.map((cat) => new ProductCategory(cat));
+      id = new ProductId(createProductCommand.data.id);
+      correlationId = new CorrelationId(createProductCommand.metadata.correlationId);
+    } catch (error) {
+      // Handle any errors that occur during product creation
+      console.error('Error handling CreateProductCommand:', error);
+      return;
+    }
     await this.createProductUseCase.execute({
       name: createProductCommand.data.name,
       description: createProductCommand.data.description,
-      price: createProductCommand.data.price,
-      categories: createProductCommand.data.categories,
+      price: price,
+      categories: categories,
       sku: createProductCommand.data.sku,
-      id: createProductCommand.data.id,
-      correlationId: createProductCommand.metadata.correlationId.getValue(),
+      id: id,
+      correlationId: correlationId,
     });
   }
 
@@ -49,7 +64,7 @@ export class ProductsEventController {
       price: new Price(updateProductCommand.data.price),
       categories: updateProductCommand.data.categories.map((cat) => new ProductCategory(cat)),
       id: new ProductId(updateProductCommand.data.id),
-      correlationId: updateProductCommand.metadata.correlationId.getValue(),
+      correlationId: updateProductCommand.metadata.correlationId,
     });
   }
 
@@ -61,7 +76,7 @@ export class ProductsEventController {
 
     await this.deleteProductUseCase.execute({
       id: new ProductId(deleteProductCommand.data.id),
-      correlationId: deleteProductCommand.metadata.correlationId.getValue(),
+      correlationId: deleteProductCommand.metadata.correlationId,
     });
   }
 }

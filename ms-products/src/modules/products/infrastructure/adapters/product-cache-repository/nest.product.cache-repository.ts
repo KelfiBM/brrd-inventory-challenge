@@ -4,7 +4,7 @@ import { Cache } from 'cache-manager';
 import { ProductCacheRepositoryPort } from '../../../application/ports/product.cache-repository.port';
 import { CacheKeys } from '../../../configs/products.consts';
 import { ProductId } from '../../../domain/value-objects/product-id.vo';
-import { ProductDbEntity } from '../product-repository/type-orm-product-repository/schema/product.db-entity';
+import { ProductDbEntity } from '../product-repository/type-orm-product-repository/entities/product.db-entity';
 
 @Injectable()
 export class NestProductCacheRepository implements ProductCacheRepositoryPort {
@@ -15,11 +15,7 @@ export class NestProductCacheRepository implements ProductCacheRepositoryPort {
     return value || [];
   }
   async saveAll(products: ProductDbEntity[]): Promise<void> {
-    await this.cacheManager.set(CacheKeys.ALL_PRODUCTS, products);
-  }
-
-  async delAll(): Promise<void> {
-    await this.cacheManager.del(CacheKeys.ALL_PRODUCTS);
+    await this.cacheManager.set(CacheKeys.ALL_PRODUCTS, products, 0);
   }
 
   async findByCategory(category: string): Promise<ProductDbEntity[]> {
@@ -30,11 +26,7 @@ export class NestProductCacheRepository implements ProductCacheRepositoryPort {
   }
 
   async saveByCategory(category: string, products: ProductDbEntity[]): Promise<void> {
-    await this.cacheManager.set(CacheKeys.PRODUCTS_BY_CATEGORY(category), products);
-  }
-
-  async delByCategory(): Promise<void> {
-    await this.cacheManager.del(CacheKeys.PRODUCTS_BY_CATEGORY('*')); // Invalidate all category caches
+    await this.cacheManager.set(CacheKeys.PRODUCTS_BY_CATEGORY(category), products, 0);
   }
 
   async findById(id: ProductId): Promise<ProductDbEntity | null> {
@@ -45,14 +37,26 @@ export class NestProductCacheRepository implements ProductCacheRepositoryPort {
   }
 
   async save(product: ProductDbEntity): Promise<ProductDbEntity> {
-    await this.cacheManager.set(CacheKeys.PRODUCT_BY_ID(product.id), product);
+    await this.cacheManager.del(CacheKeys.ALL_PRODUCTS);
+    const oldProduct = await this.cacheManager.get<ProductDbEntity>(CacheKeys.PRODUCT_BY_ID(product.id));
+    if (oldProduct) {
+      for (const category of oldProduct.categories) {
+        await this.cacheManager.del(CacheKeys.PRODUCTS_BY_CATEGORY(category));
+      }
+    }
+    await this.cacheManager.set(CacheKeys.PRODUCT_BY_ID(product.id), product, 0);
     return product;
   }
 
   async remove(id: ProductId): Promise<void> {
     await this.cacheManager.del(CacheKeys.ALL_PRODUCTS);
+    const oldProduct = await this.cacheManager.get<ProductDbEntity>(CacheKeys.PRODUCT_BY_ID(id.getValue()));
+    if (oldProduct) {
+      for (const category of oldProduct.categories) {
+        await this.cacheManager.del(CacheKeys.PRODUCTS_BY_CATEGORY(category));
+      }
+    }
     await this.cacheManager.del(CacheKeys.PRODUCT_BY_ID(id.getValue()));
-    await this.cacheManager.del(CacheKeys.PRODUCTS_BY_CATEGORY('*')); // Invalidate all category caches
   }
 
   async getExchangeRateTable(forCurrency: string): Promise<{ [currency: string]: number }> {
@@ -66,6 +70,6 @@ export class NestProductCacheRepository implements ProductCacheRepositoryPort {
     forCurrency: string,
     rates: { [currency: string]: number }
   ): Promise<void> {
-    await this.cacheManager.set(CacheKeys.EXCHANGE_RATES(forCurrency), rates);
+    await this.cacheManager.set(CacheKeys.EXCHANGE_RATES(forCurrency), rates, 3600 * 1000 * 24);
   }
 }

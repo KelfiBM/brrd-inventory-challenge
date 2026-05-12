@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductCommand } from '../../commands/create-product.command';
+import { DuplicatedProductError } from '../../domain/errors/duplicated-product.error';
+import { Price } from '../../domain/value-objects/price.vo';
+import { ProductCategory } from '../../domain/value-objects/product-category.vo';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 import {
   PRODUCT_EVENT_EMITTER,
@@ -10,8 +13,8 @@ import { PRODUCT_REPOSITORY, ProductRepositoryPort } from '../ports/product.repo
 type RequestProductCreationDto = {
   name: string;
   description: string;
-  price: number;
-  categories: string[];
+  price: Price;
+  categories: ProductCategory[];
   sku: string;
 };
 
@@ -27,7 +30,7 @@ export class RequestProductCreationUseCase {
   async execute(requestProductCreationDto: RequestProductCreationDto): Promise<ProductId> {
     const existingProduct = await this.productRepository.findBySku(requestProductCreationDto.sku);
     if (existingProduct) {
-      throw new Error('Product with the same SKU already exists');
+      throw new DuplicatedProductError(`Product with SKU ${requestProductCreationDto.sku} already exists.`);
     }
     const nextProductId = await this.productRepository.getNextId();
 
@@ -35,8 +38,8 @@ export class RequestProductCreationUseCase {
       id: nextProductId.getValue(),
       name: requestProductCreationDto.name,
       description: requestProductCreationDto.description,
-      price: requestProductCreationDto.price,
-      categories: requestProductCreationDto.categories,
+      price: requestProductCreationDto.price.getValue(),
+      categories: requestProductCreationDto.categories.map((cat) => cat.getValue()),
       sku: requestProductCreationDto.sku,
     });
     await this.productEventEmitter.emitCreateProductCommand(createProductCommand);

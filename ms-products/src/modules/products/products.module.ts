@@ -25,10 +25,11 @@ import { NestProductCacheRepository } from './infrastructure/adapters/product-ca
 import { NestProductConfig } from './infrastructure/adapters/product-config/nest.product.config';
 import { NestProductEventEmitter } from './infrastructure/adapters/product-event-emitter/nest.product.event-emitter';
 import { NestProductLogger } from './infrastructure/adapters/product-logger/nest.product.logger';
-import { ProductSchema } from './infrastructure/adapters/product-repository/type-orm-product-repository/schema/product.schema';
+import { ProductDbEntity } from './infrastructure/adapters/product-repository/type-orm-product-repository/entities/product.db-entity';
 import { TypeOrmProductRepository } from './infrastructure/adapters/product-repository/type-orm-product-repository/type-orm-product.repository';
 import { AuthGuard } from './presentation/guards/auth.guard';
 import { RolesGuard } from './presentation/guards/role.guard';
+import { HttpResponseInterceptor } from './presentation/interceptors/http-response.interceptor';
 import { ProductIdempotencyInterceptor } from './presentation/interceptors/product-idempotency.interceptor';
 import { ProductsEventController } from './presentation/products.event.controller';
 import { ProductsHttpController } from './presentation/products.http.controller';
@@ -36,7 +37,7 @@ import { ProductsHttpController } from './presentation/products.http.controller'
 const imports = [
   ConfigModule.forFeature(productsConfig),
   HttpModule,
-  TypeOrmModule.forFeature([ProductSchema]),
+  TypeOrmModule.forFeature([ProductDbEntity]),
   EventStreamingModule,
   CacheManagerModule,
   AuthModule,
@@ -81,7 +82,9 @@ const adapters = [
   },
 ];
 
-const providers = [...useCases, ...adapters, ProductIdempotencyInterceptor, RolesGuard, AuthGuard];
+const interceptors = [ProductIdempotencyInterceptor, HttpResponseInterceptor];
+
+const providers = [...useCases, ...adapters, ...interceptors, RolesGuard, AuthGuard];
 
 @Module({
   imports: [...imports],

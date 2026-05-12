@@ -1,5 +1,6 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
@@ -9,7 +10,7 @@ import {
   Post,
   Query,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { routesV1 } from '../../../configs/app.routes';
 import { FindAllProductsUseCase } from '../application/use-cases/find-all-products.use-case';
@@ -17,6 +18,7 @@ import { FindOneProductUseCase } from '../application/use-cases/find-one-product
 import { RequestProductCreationUseCase } from '../application/use-cases/request-product-creation.use-case';
 import { RequestProductDeletionUseCase } from '../application/use-cases/request-product-deletion.use-case';
 import { RequestProductUpdateUseCase } from '../application/use-cases/request-product-update.use-case';
+import { DuplicatedProductError } from '../domain/errors/duplicated-product.error';
 import { Currency } from '../domain/value-objects/currency.vo';
 import { Price } from '../domain/value-objects/price.vo';
 import { ProductCategory } from '../domain/value-objects/product-category.vo';
@@ -28,10 +30,12 @@ import { IdResponseDto } from './dtos/id.response.dto';
 import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
 import { Role } from './enum/role.enum';
 import { AuthGuard } from './guards/auth.guard';
+import { HttpResponseInterceptor } from './interceptors/http-response.interceptor';
 import { ProductIdempotencyInterceptor } from './interceptors/product-idempotency.interceptor';
 
 @Controller(routesV1.version)
 @UseGuards(AuthGuard)
+@UseInterceptors(HttpResponseInterceptor)
 export class ProductsHttpController {
   constructor(
     private readonly requestProductCreationUseCase: RequestProductCreationUseCase,
@@ -47,8 +51,19 @@ export class ProductsHttpController {
   async requestCreate(
     @Body() createProductRequestDto: CreateProductRequestDto
   ): Promise<IdResponseDto> {
-    const productId = await this.requestProductCreationUseCase.execute(createProductRequestDto);
-    return { id: productId.getValue(), message: 'Product creation requested successfully' };
+    try {
+      const productId = await this.requestProductCreationUseCase.execute({
+        ...createProductRequestDto,
+        price: new Price(createProductRequestDto.price),
+        categories: createProductRequestDto.categories.map((cat) => new ProductCategory(cat)),
+      });
+      return { id: productId.getValue(), message: 'Product creation requested successfully' };
+    } catch (error) {
+      if (error instanceof DuplicatedProductError) {
+        throw new ConflictException(error.message);
+      }
+      throw error;
+    }
   }
 
   @UseInterceptors(ProductIdempotencyInterceptor)

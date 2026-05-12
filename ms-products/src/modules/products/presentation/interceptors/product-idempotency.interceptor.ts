@@ -29,7 +29,7 @@ export class ProductIdempotencyInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((response) => {
-        this.cacheManager.set(hash, response, 3600); // Cache for 1 hour
+        this.cacheManager.set(hash, response, 3600 * 1000); // Cache for 1 hour
         return response;
       })
     );

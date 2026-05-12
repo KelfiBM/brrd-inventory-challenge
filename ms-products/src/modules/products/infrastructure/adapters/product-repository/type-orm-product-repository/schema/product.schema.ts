@@ -38,6 +38,14 @@ export const ProductSchema = new EntitySchema<Product>({
       type: 'simple-json',
       name: 'price_history',
     },
+    getCreatedAt: {
+      type: 'timestamp',
+      name: 'created_at',
+    },
+    getUpdatedAt: {
+      type: 'timestamp',
+      name: 'updated_at',
+    },
   },
   relations: {},
 });

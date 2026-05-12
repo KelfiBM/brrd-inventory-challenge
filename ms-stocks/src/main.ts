@@ -17,7 +17,7 @@ async function bootstrap() {
       },
       consumer: {
         groupId:
-          process.env.EVENT_STREAMING_CONSUMER_GROUP_ID ?? 'ms-products-group',
+          process.env.EVENT_STREAMING_CONSUMER_GROUP_ID ?? 'ms-stocks-group',
       },
     },
   });

@@ -69,7 +69,6 @@ permitiendo realizar operaciones como agregar, actualizar, eliminar y consultar 
 | `e.products.updated` | Producto actualizado en la base de datos | Evento |
 | `e.products.deleted` | Producto eliminado en la base de datos | Evento |
 | `e.stocks.created` | Inventario de un producto creado | Evento |
-| `e.stock-movements.created` | Movimiento de inventario registrado en la base de datos | Evento |
 | `e.stocks.updated` | Inventario de un producto actualizado | Evento |
 | `e.stocks.deleted` | Inventario de un producto eliminado | Evento |
 
@@ -307,8 +306,8 @@ permitiendo realizar operaciones como agregar, actualizar, eliminar y consultar 
 3. Leer evento `c.stock-movements.create` desde la cola de eventos
 4. Crear movimiento de inventario del producto en la base de datos
 5. Actualizar inventario en la base de datos
-6. Emitir evento `e.stock-movements.created` a la cola de eventos
-7. Leer evento `e.stock-movements.created` desde la cola de eventos
+6. Emitir evento `e.stocks.updated` a la cola de eventos
+7. Leer evento `e.stocks.updated` desde la cola de eventos
 8. Actualizar caché
 9. Fin
 

@@ -9,6 +9,14 @@ import { ProductId } from '../../../domain/value-objects/product-id.vo';
 @Injectable()
 export class NestStockCacheRepository implements StockCacheRepositoryPort {
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
+  async setStockByProductId(
+    productId: ProductId,
+    stock: Stock,
+  ): Promise<Stock> {
+    const key = CacheKeys.STOCK(productId.getValue());
+    await this.cacheManager.set(key, stock);
+    return stock;
+  }
   async getStockByProductId(productId: ProductId): Promise<Stock | null> {
     const value = await this.cacheManager.get<Stock>(
       CacheKeys.STOCK(productId.getValue()),

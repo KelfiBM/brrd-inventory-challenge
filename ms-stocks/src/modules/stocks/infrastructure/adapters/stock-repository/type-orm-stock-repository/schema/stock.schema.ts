@@ -20,7 +20,7 @@ export const StockSchema = new EntitySchema<Stock>({
     },
     getMovements: {
       type: 'json',
-      name: 'movements',
+      name: 'stockMovements',
     },
     getCreatedAt: {
       type: 'timestamp',

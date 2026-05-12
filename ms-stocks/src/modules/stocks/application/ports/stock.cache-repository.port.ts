@@ -3,6 +3,7 @@ import { ProductId } from '../../domain/value-objects/product-id.vo';
 
 export interface StockCacheRepositoryPort {
   getStockByProductId(productId: ProductId): Promise<Stock | null>;
+  setStockByProductId(productId: ProductId, stock: Stock): Promise<Stock>;
   removeStockByProductId(productId: ProductId): Promise<void>;
 }
 

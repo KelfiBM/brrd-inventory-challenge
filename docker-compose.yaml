@@ -79,25 +79,43 @@ services:
     depends_on:
       - redis
       - postgres-products
+      - kafka
     ports:
       - "3000:3000"
 
-  # postgres-stocks:
-  #   image: postgres
-  #   restart: always
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #     POSTGRES_DB: stocks
-  #   ports:
-  #     - "5433:5432"
+  postgres-stocks:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: stocks
+    ports:
+      - "5433:5432"
 
-  # ms-stocks:
-  #   build: ./ms-stocks
-  #   depends_on:
-  #     - kafka
-  #     - redis
-  #     - postgres-stocks
+  ms-stocks:
+    build: ./ms-stocks
+    environment:
+      POSTGRES_DB_HOST: postgres-stocks
+      POSTGRES_DB_PORT: 5432
+      POSTGRES_DB_USERNAME: postgres
+      POSTGRES_DB_PASSWORD: postgres
+      POSTGRES_DB_NAME: stocks
+      POSTGRES_DB_SYNCHRONIZE: true
+      PRODUCTS_DEFAULT_CURRENCY: DOP
+      EXCHANGE_RATE_API_URL: https://v6.exchangerate-api.com/v6/
+      EXCHANGE_RATE_API_KEY: 00d7d10e5b62944a6091a4b9
+      EVENT_STREAMING_BROKERS: kafka:9092
+      EVENT_STREAMING_CLIENT_ID: ms-stocks-client
+      EVENT_STREAMING_CONSUMER_GROUP_ID: ms-stocks-group
+      CACHE_URL: redis://redis:6379
+      JWT_SECRET: my_super_secret_jwt_key
+    depends_on:
+      - redis
+      - postgres-stocks
+      - kafka
+    ports:
+      - "3001:3000"
 
   auth:
     build: ./auth

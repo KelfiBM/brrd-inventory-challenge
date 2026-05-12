@@ -1,10 +1,12 @@
-import { Stock } from '../../domain/entities/stock.entity';
-import { ProductId } from '../../domain/value-objects/product-id.vo';
+import { StockDbEntity } from '../../infrastructure/adapters/stock-repository/type-orm-stock-repository/schema/stock.db-entity';
 
 export interface StockCacheRepositoryPort {
-  getStockByProductId(productId: ProductId): Promise<Stock | null>;
-  setStockByProductId(productId: ProductId, stock: Stock): Promise<Stock>;
-  removeStockByProductId(productId: ProductId): Promise<void>;
+  getStockByProductId(productId: string): Promise<StockDbEntity | null>;
+  setStockByProductId(
+    productId: string,
+    stock: StockDbEntity,
+  ): Promise<StockDbEntity>;
+  removeStockByProductId(productId: string): Promise<void>;
 }
 
 export const STOCK_CACHE_REPOSITORY = Symbol('STOCK_CACHE_REPOSITORY');

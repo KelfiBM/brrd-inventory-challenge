@@ -18,7 +18,6 @@ import { FindOneProductUseCase } from './application/use-cases/find-one-product.
 import { RequestProductCreationUseCase } from './application/use-cases/request-product-creation.use-case';
 import { RequestProductDeletionUseCase } from './application/use-cases/request-product-deletion.use-case';
 import { RequestProductUpdateUseCase } from './application/use-cases/request-product-update.use-case';
-import { InvalidateCacheUseCase } from './application/use-cases/update-cache.use-case';
 import { UpdateProductUseCase } from './application/use-cases/update-product.use-case';
 import productsConfig from './configs/products.config';
 import { ExchangeRateApiCurrencyConverter } from './infrastructure/adapters/currency-converter/exchange-rate-api.currency-converter';
@@ -51,7 +50,6 @@ const useCases = [
   CreateProductUseCase,
   DeleteProductUseCase,
   UpdateProductUseCase,
-  InvalidateCacheUseCase,
   FindAllProductsUseCase,
   FindOneProductUseCase,
 ];

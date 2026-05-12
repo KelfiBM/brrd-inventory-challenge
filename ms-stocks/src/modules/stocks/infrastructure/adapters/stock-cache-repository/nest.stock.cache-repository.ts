@@ -3,28 +3,27 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { StockCacheRepositoryPort } from '../../../application/ports/stock.cache-repository.port';
 import { CacheKeys } from '../../../configs/stocks.consts';
-import { Stock } from '../../../domain/entities/stock.entity';
-import { ProductId } from '../../../domain/value-objects/product-id.vo';
+import { StockDbEntity } from '../stock-repository/type-orm-stock-repository/schema/stock.db-entity';
 
 @Injectable()
 export class NestStockCacheRepository implements StockCacheRepositoryPort {
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
   async setStockByProductId(
-    productId: ProductId,
-    stock: Stock,
-  ): Promise<Stock> {
-    const key = CacheKeys.STOCK(productId.getValue());
+    productId: string,
+    stock: StockDbEntity,
+  ): Promise<StockDbEntity> {
+    const key = CacheKeys.STOCK(productId);
     await this.cacheManager.set(key, stock);
     return stock;
   }
-  async getStockByProductId(productId: ProductId): Promise<Stock | null> {
-    const value = await this.cacheManager.get<Stock>(
-      CacheKeys.STOCK(productId.getValue()),
+  async getStockByProductId(productId: string): Promise<StockDbEntity | null> {
+    const value = await this.cacheManager.get<StockDbEntity>(
+      CacheKeys.STOCK(productId),
     );
     return value || null;
   }
-  async removeStockByProductId(productId: ProductId): Promise<void> {
-    const key = CacheKeys.STOCK(productId.getValue());
+  async removeStockByProductId(productId: string): Promise<void> {
+    const key = CacheKeys.STOCK(productId);
     await this.cacheManager.del(key);
   }
 }

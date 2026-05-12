@@ -29,7 +29,11 @@ export class FindOneProductUseCase {
       return this.convertCurrency(product, findOneProductRequestDto.currency);
     }
 
-    return this.mapResponse(product);
+    const response = this.mapResponse(product);
+    if (!findOneProductRequestDto.includePriceHistory) {
+      response.priceHistory = undefined;
+    }
+    return response;
   }
 
   private async findProduct(findOneProductRequestDto: FindOneProductRequestDto): Promise<Product> {

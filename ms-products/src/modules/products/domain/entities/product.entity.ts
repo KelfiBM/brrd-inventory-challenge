@@ -29,7 +29,8 @@ export class Product {
     price: number,
     categories: string[],
     sku: string,
-    currency: string = 'DOP'
+    currency: string = 'DOP',
+    priceHistory: PriceHistoryEntry[] = []
   ): Product {
     Product.ensureValidName(name);
     Product.ensureValidSku(sku);
@@ -46,7 +47,7 @@ export class Product {
       new Currency(currency),
       productCategories,
       sku,
-      [{ price: new Price(price), changedAt: now }],
+      priceHistory.length > 0 ? priceHistory : [{ price: new Price(price), changedAt: now }],
       now,
       now
     );

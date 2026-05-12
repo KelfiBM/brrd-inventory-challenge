@@ -3,14 +3,11 @@ import { EventPattern, Payload } from '@nestjs/microservices';
 import { routesV1 } from '../../../configs/app.routes';
 import { CreateProductUseCase } from '../application/use-cases/create-product.use-case';
 import { DeleteProductUseCase } from '../application/use-cases/delete-product.use-case';
-import { InvalidateCacheUseCase } from '../application/use-cases/update-cache.use-case';
 import { UpdateProductUseCase } from '../application/use-cases/update-product.use-case';
 import { CreateProductCommand } from '../commands/create-product.command';
 import { DeleteProductCommand } from '../commands/delete-product.command';
 import { UpdateProductCommand } from '../commands/update-product.command';
-import { CommandNames, DomainEventNames } from '../configs/products.consts';
-import { Product } from '../domain/entities/product.entity';
-import { DomainEvent } from '../domain/events/domain-event';
+import { CommandNames } from '../configs/products.consts';
 import { Price } from '../domain/value-objects/price.vo';
 import { ProductCategory } from '../domain/value-objects/product-category.vo';
 import { ProductId } from '../domain/value-objects/product-id.vo';
@@ -20,8 +17,7 @@ export class ProductsEventController {
   constructor(
     private readonly createProductUseCase: CreateProductUseCase,
     private readonly updateProductUseCase: UpdateProductUseCase,
-    private readonly deleteProductUseCase: DeleteProductUseCase,
-    private readonly updateCacheUseCase: InvalidateCacheUseCase
+    private readonly deleteProductUseCase: DeleteProductUseCase
   ) {}
 
   @EventPattern(CommandNames.CREATE_PRODUCT)
@@ -66,17 +62,6 @@ export class ProductsEventController {
     await this.deleteProductUseCase.execute({
       id: new ProductId(deleteProductCommand.data.id),
       correlationId: deleteProductCommand.metadata.correlationId.getValue(),
-    });
-  }
-
-  @EventPattern([
-    DomainEventNames.PRODUCT_CREATED,
-    DomainEventNames.PRODUCT_UPDATED,
-    DomainEventNames.PRODUCT_DELETED,
-  ])
-  async handleInvalidateCacheEvent(@Payload() productEvent: DomainEvent<Product>) {
-    await this.updateCacheUseCase.execute({
-      product: productEvent.data,
     });
   }
 }

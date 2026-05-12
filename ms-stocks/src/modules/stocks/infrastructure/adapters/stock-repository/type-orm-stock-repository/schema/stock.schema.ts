@@ -1,32 +1,32 @@
 import { EntitySchema } from 'typeorm';
-import { Stock } from '../../../../../domain/entities/stock.entity';
+import { StockDbEntity } from './stock.db-entity';
 
-export const StockSchema = new EntitySchema<Stock>({
+export const StockSchema = new EntitySchema<StockDbEntity>({
   name: 'Stock',
-  target: Stock,
+  target: StockDbEntity,
   columns: {
-    getId: {
+    productId: {
       primary: true,
       type: 'varchar',
       name: 'id',
     },
-    getName: {
+    productName: {
       type: 'varchar',
       name: 'name',
     },
-    getStock: {
+    stock: {
       type: 'int',
       name: 'stock',
     },
-    getMovements: {
+    stockMovements: {
       type: 'json',
-      name: 'movements',
+      name: 'stockMovements',
     },
-    getCreatedAt: {
+    createdAt: {
       type: 'timestamp',
       name: 'created_at',
     },
-    getUpdatedAt: {
+    updatedAt: {
       type: 'timestamp',
       name: 'updated_at',
     },

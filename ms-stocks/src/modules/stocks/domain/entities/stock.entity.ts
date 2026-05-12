@@ -12,7 +12,14 @@ export class Stock {
     private readonly movements: StockMovement[] = [],
   ) {}
 
-  static create(productId: string, productName: string, stock?: number): Stock {
+  static create(
+    productId: string,
+    productName: string,
+    stock?: number,
+    movements: StockMovement[] = [],
+    createdAt?: Date,
+    updatedAt?: Date,
+  ): Stock {
     Stock.ensureValidName(productName);
 
     const now = new Date();
@@ -20,8 +27,9 @@ export class Stock {
       new ProductId(productId),
       productName,
       new AvailableStock(stock || 0),
-      now,
-      now,
+      createdAt || now,
+      updatedAt || now,
+      movements,
     );
   }
 

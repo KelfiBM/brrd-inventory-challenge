@@ -1,11 +1,15 @@
-import { Product } from '@products/domain/entities/product.entity';
 import { ProductId } from '@products/domain/value-objects/product-id.vo';
+import { ProductDbEntity } from '../../infrastructure/adapters/product-repository/type-orm-product-repository/schema/product.db-entity';
 
 export interface ProductCacheRepositoryPort {
-  findAll(): Promise<Product[]>;
-  findByCategory(category: string): Promise<Product[]>;
-  findById(id: ProductId): Promise<Product | null>;
-  save(product: Product): Promise<Product>;
+  findAll(): Promise<ProductDbEntity[]>;
+  saveAll(products: ProductDbEntity[]): Promise<void>;
+  delAll(): Promise<void>;
+  findByCategory(category: string): Promise<ProductDbEntity[]>;
+  saveByCategory(category: string, products: ProductDbEntity[]): Promise<void>;
+  delByCategory(): Promise<void>;
+  findById(id: ProductId): Promise<ProductDbEntity | null>;
+  save(product: ProductDbEntity): Promise<ProductDbEntity>;
   remove(id: ProductId): Promise<void>;
 
   getExchangeRateTable(forCurrency: string): Promise<{ [currency: string]: number }>;

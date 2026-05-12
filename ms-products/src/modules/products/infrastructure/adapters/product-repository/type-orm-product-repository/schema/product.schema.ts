@@ -1,48 +1,48 @@
 import { EntitySchema } from 'typeorm';
-import { Product } from '../../../../../domain/entities/product.entity';
+import { ProductDbEntity } from './product.db-entity';
 
-export const ProductSchema = new EntitySchema<Product>({
+export const ProductSchema = new EntitySchema<ProductDbEntity>({
   name: 'Product',
-  target: Product,
+  target: ProductDbEntity,
   columns: {
-    getId: {
+    id: {
       primary: true,
       type: 'varchar',
       name: 'id',
     },
-    getName: {
+    name: {
       type: 'varchar',
       name: 'name',
     },
-    getDescription: {
+    description: {
       type: 'text',
       name: 'description',
     },
-    getPrice: {
+    price: {
       type: 'decimal',
       name: 'price',
     },
-    getCurrency: {
+    currency: {
       type: 'varchar',
       name: 'currency',
     },
-    getCategories: {
+    categories: {
       type: 'simple-array',
       name: 'categories',
     },
-    getSku: {
+    sku: {
       type: 'varchar',
       name: 'sku',
     },
-    getPriceHistory: {
+    priceHistory: {
       type: 'simple-json',
       name: 'price_history',
     },
-    getCreatedAt: {
+    createdAt: {
       type: 'timestamp',
       name: 'created_at',
     },
-    getUpdatedAt: {
+    updatedAt: {
       type: 'timestamp',
       name: 'updated_at',
     },

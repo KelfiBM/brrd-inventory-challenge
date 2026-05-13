@@ -22,32 +22,40 @@ export class Product {
     private updatedAt: Date
   ) {}
 
-  static create(
-    id: string,
-    name: string,
-    description: string,
-    price: number,
-    categories: string[],
-    sku: string,
-    currency: string = 'DOP',
-    priceHistory: PriceHistoryEntry[] = []
-  ): Product {
+  static create({
+    id,
+    name,
+    description,
+    price,
+    categories,
+    sku,
+    currency = new Currency('DOP'),
+    priceHistory = [],
+  }: {
+    id: ProductId;
+    name: string;
+    description: string;
+    price: Price;
+    categories: ProductCategory[];
+    sku: string;
+    currency?: Currency;
+    priceHistory?: PriceHistoryEntry[];
+  }): Product {
     Product.ensureValidName(name);
     Product.ensureValidSku(sku);
 
-    const productCategories = categories.map((cat) => new ProductCategory(cat));
-    Product.ensureValidCategories(productCategories);
+    Product.ensureValidCategories(categories);
     const now = new Date();
 
     return new Product(
-      new ProductId(id),
+      id,
       name,
       description,
-      new Price(price),
-      new Currency(currency),
-      productCategories,
+      price,
+      currency,
+      categories,
       sku,
-      priceHistory.length > 0 ? priceHistory : [{ price: new Price(price), changedAt: now }],
+      priceHistory.length > 0 ? priceHistory : [{ price: price, changedAt: now }],
       now,
       now
     );

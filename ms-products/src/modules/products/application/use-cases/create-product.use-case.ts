@@ -1,7 +1,11 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Product } from '../../domain/entities/product.entity';
-import { ProductCreatedEvent } from '../../domain/events/product-created.event';
+import { ProductChangedEvent } from '../../domain/events/product-changed.event';
 
+import { CorrelationId } from '../../domain/value-objects/correlation-id.vo';
+import { Currency } from '../../domain/value-objects/currency.vo';
+import { Price } from '../../domain/value-objects/price.vo';
+import { ProductCategory } from '../../domain/value-objects/product-category.vo';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 import { PRODUCT_CONFIG, ProductConfigPort } from '../ports/product.config.port';
 import {
@@ -12,12 +16,12 @@ import { PRODUCT_LOGGER, ProductLoggerPort } from '../ports/product.logger.port'
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from '../ports/product.repository.port';
 
 type CreateProductDto = {
-  correlationId: string;
-  id: string;
+  correlationId: CorrelationId;
+  id: ProductId;
   name: string;
   description: string;
-  price: number;
-  categories: string[];
+  price: Price;
+  categories: ProductCategory[];
   sku: string;
 };
 
@@ -44,31 +48,31 @@ export class CreateProductUseCase {
       return;
     }
 
-    const productId = new ProductId(createProductDto.id);
-
     const existingProduct =
-      (await this.productRepository.findById(productId)) ||
+      (await this.productRepository.findById(createProductDto.id)) ||
       (await this.productRepository.findBySku(createProductDto.sku));
     if (existingProduct) {
       this.logger?.warn(
-        `Product with ID ${createProductDto.id} or SKU ${createProductDto.sku} already exists.`
+        `Product with ID ${createProductDto.id.getValue()} or SKU ${createProductDto.sku} already exists.`
       );
       return;
     }
 
-    const newProduct = Product.create(
-      createProductDto.id,
-      createProductDto.name,
-      createProductDto.description,
-      createProductDto.price,
-      createProductDto.categories,
-      createProductDto.sku,
-      this.productConfig.defaultCurrency()
-    );
+    const defaultCurrency = new Currency(this.productConfig.defaultCurrency());
+
+    const newProduct = Product.create({
+      id: createProductDto.id,
+      name: createProductDto.name,
+      description: createProductDto.description,
+      price: createProductDto.price,
+      categories: createProductDto.categories,
+      sku: createProductDto.sku,
+      currency: defaultCurrency,
+    });
     const savedProduct = await this.productRepository.save(newProduct);
 
-    const productCreatedEvent = new ProductCreatedEvent(
-      createProductDto.correlationId,
+    const productCreatedEvent = new ProductChangedEvent(
+      createProductDto.correlationId.getValue(),
       savedProduct
     );
 

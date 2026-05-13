@@ -11,19 +11,15 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: process.env.EVENT_STREAMING_BROKERS?.split(',') ?? [
-          'localhost:9092',
-        ],
+        brokers: process.env.EVENT_STREAMING_BROKERS?.split(',') ?? ['localhost:9092'],
       },
       consumer: {
-        groupId:
-          process.env.EVENT_STREAMING_CONSUMER_GROUP_ID ?? 'ms-products-group',
+        groupId: process.env.EVENT_STREAMING_CONSUMER_GROUP_ID ?? 'ms-stocks-group',
       },
     },
   });
 
   await app.startAllMicroservices();
-
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

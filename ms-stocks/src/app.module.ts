@@ -5,6 +5,7 @@ import appConfig from './configs/app.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { CacheManagerModule } from './modules/cache-manager/cache-manager.module';
 import { EventStreamingModule } from './modules/event-streaming/event-streaming.module';
+import { StocksModule } from './modules/stocks/stocks.module';
 
 @Module({
   imports: [
@@ -22,11 +23,12 @@ import { EventStreamingModule } from './modules/event-streaming/event-streaming.
         username: config.database.postgres.username,
         password: config.database.postgres.password,
         database: config.database.postgres.database,
-        entities: [],
+        autoLoadEntities: true,
         synchronize: config.database.postgres.synchronize,
       }),
     }),
     CacheManagerModule,
+    StocksModule,
     EventStreamingModule,
     AuthModule,
   ],

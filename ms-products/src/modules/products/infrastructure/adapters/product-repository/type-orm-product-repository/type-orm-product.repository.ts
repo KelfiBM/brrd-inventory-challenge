@@ -8,10 +8,11 @@ import {
 } from '../../../../application/ports/product.cache-repository.port';
 import { ProductRepositoryPort } from '../../../../application/ports/product.repository.port';
 import { Product } from '../../../../domain/entities/product.entity';
+import { Currency } from '../../../../domain/value-objects/currency.vo';
 import { Price } from '../../../../domain/value-objects/price.vo';
 import { ProductCategory } from '../../../../domain/value-objects/product-category.vo';
 import { ProductId } from '../../../../domain/value-objects/product-id.vo';
-import { ProductDbEntity } from './schema/product.db-entity';
+import { ProductDbEntity } from './entities/product.db-entity';
 
 export class TypeOrmProductRepository implements ProductRepositoryPort {
   constructor(
@@ -27,7 +28,7 @@ export class TypeOrmProductRepository implements ProductRepositoryPort {
   }
   async findAll(): Promise<Product[]> {
     const cachedResults = await this.productCacheRepository.findAll();
-    if (cachedResults) {
+    if (cachedResults && cachedResults.length > 0) {
       return this.toDomainEntities(cachedResults);
     }
 
@@ -38,7 +39,7 @@ export class TypeOrmProductRepository implements ProductRepositoryPort {
 
   async findByCategory(category: ProductCategory): Promise<Product[]> {
     const cachedResults = await this.productCacheRepository.findByCategory(category.getValue());
-    if (cachedResults) {
+    if (cachedResults && cachedResults.length > 0) {
       return this.toDomainEntities(cachedResults);
     }
     const products = await this.productRepository.find({
@@ -46,13 +47,14 @@ export class TypeOrmProductRepository implements ProductRepositoryPort {
         categories: Like(`%${category.getValue()}%`),
       },
     });
-
-    await this.productCacheRepository.saveByCategory(category.getValue(), products);
+    if (products.length > 0) {
+      await this.productCacheRepository.saveByCategory(category.getValue(), products);
+    }
     return this.toDomainEntities(products);
   }
 
-  async findById(id: ProductId, includePriceHistory?: boolean): Promise<Product> {
-    const cachedProduct = await this.productCacheRepository.findById(id);
+  async findById(id: ProductId, includePriceHistory?: boolean): Promise<Product | null> {
+    const cachedProduct = await this.productCacheRepository.findById(id.getValue());
     if (cachedProduct) {
       return this.toDomainEntity(cachedProduct);
     }
@@ -77,32 +79,31 @@ export class TypeOrmProductRepository implements ProductRepositoryPort {
         });
 
     if (!product) {
-      throw new Error(`Product with ID ${id.getValue()} not found`);
+      return null;
     }
     await this.productCacheRepository.save(product);
     return this.toDomainEntity(product);
   }
 
-  async findBySku(sku: string): Promise<Product> {
+  async findBySku(sku: string): Promise<Product | null> {
     const product = await this.productRepository.findOne({ where: { sku } });
     if (!product) {
-      throw new Error(`Product with SKU ${sku} not found`);
+      return null;
     }
     await this.productCacheRepository.save(product);
     return this.toDomainEntity(product);
   }
+  
   async save(product: Product): Promise<Product> {
     const dbEntity = this.toDbEntity(product);
     await this.productRepository.save(dbEntity);
-    await this.productCacheRepository.delAll();
-    await this.productCacheRepository.delByCategory();
     await this.productCacheRepository.save(dbEntity);
 
     return this.toDomainEntity(dbEntity);
   }
   async remove(id: ProductId): Promise<void> {
     await this.productRepository.delete(id.getValue());
-    await this.productCacheRepository.remove(id);
+    await this.productCacheRepository.remove(id.getValue());
   }
 
   private toDomainEntities(dbEntities: ProductDbEntity[]): Product[] {
@@ -110,18 +111,18 @@ export class TypeOrmProductRepository implements ProductRepositoryPort {
   }
 
   private toDomainEntity(dbEntity: ProductDbEntity): Product {
-    return Product.create(
-      dbEntity.id,
-      dbEntity.name,
-      dbEntity.description,
-      dbEntity.price,
-      dbEntity.categories,
-      dbEntity.sku,
-      dbEntity.currency,
-      dbEntity.priceHistory.map((entry) => ({
+    return Product.create({
+      id: new ProductId(dbEntity.id),
+      name: dbEntity.name,
+      description: dbEntity.description,
+      price: new Price(dbEntity.price),
+      categories: dbEntity.categories.map((cat) => new ProductCategory(cat)),
+      sku: dbEntity.sku,
+      currency: new Currency(dbEntity.currency),
+      priceHistory: dbEntity.priceHistory.map((entry) => ({
         price: new Price(entry.price),
         changedAt: entry.changedAt,
-      }))
+      }))}
     );
   }
 
@@ -136,6 +137,10 @@ export class TypeOrmProductRepository implements ProductRepositoryPort {
     dbEntity.sku = product.getSku();
     dbEntity.createdAt = product.getCreatedAt();
     dbEntity.updatedAt = product.getUpdatedAt();
+    dbEntity.priceHistory = product.getPriceHistory().map((entry) => ({
+      price: entry.price.getValue(),
+      changedAt: entry.changedAt,
+    }));
     return dbEntity;
   }
 }

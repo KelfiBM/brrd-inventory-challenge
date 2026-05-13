@@ -1,5 +1,6 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { StockDeletedEvent } from '../../domain/events/stock-deleted.event';
+import { StockChangedEvent } from '../../domain/events/stock-changed.event';
+import { CorrelationId } from '../../domain/value-objects/correlation-id.vo';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 import {
   STOCK_EVENT_EMITTER,
@@ -12,7 +13,7 @@ import {
 } from '../ports/stock.repository.port';
 
 type DeleteProductDto = {
-  correlationId: string;
+  correlationId: CorrelationId;
   id: ProductId;
 };
 
@@ -52,7 +53,7 @@ export class DeleteStockUseCase {
 
     await this.stockRepository.remove(deleteProductDto.id);
 
-    const stockDeletedEvent = new StockDeletedEvent(
+    const stockDeletedEvent = new StockChangedEvent(
       deleteProductDto.correlationId,
       existingProduct,
     );

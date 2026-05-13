@@ -23,7 +23,7 @@ import { ProductsModule } from './modules/products/products.module';
         username: config.database.postgres.username,
         password: config.database.postgres.password,
         database: config.database.postgres.database,
-        entities: [],
+        autoLoadEntities: true,
         synchronize: config.database.postgres.synchronize,
       }),
     }),

@@ -1,3 +1,4 @@
+import { StockNotEnoughError } from '../errors/stock-not-enough.error';
 import { AvailableStock } from '../value-objects/available-stock.vo';
 import { ProductId } from '../value-objects/product-id.vo';
 import { StockMovement } from './stock-movement.entity';
@@ -13,9 +14,9 @@ export class Stock {
   ) {}
 
   static create(
-    productId: string,
+    productId: ProductId,
     productName: string,
-    stock?: number,
+    stock?: AvailableStock,
     movements: StockMovement[] = [],
     createdAt?: Date,
     updatedAt?: Date,
@@ -24,9 +25,9 @@ export class Stock {
 
     const now = new Date();
     return new Stock(
-      new ProductId(productId),
+      productId,
       productName,
-      new AvailableStock(stock || 0),
+      stock || new AvailableStock(0),
       createdAt || now,
       updatedAt || now,
       movements,
@@ -75,17 +76,11 @@ export class Stock {
     const newStockValue = this.stock.getValue() + valueChange;
 
     if (newStockValue < 0) {
-      throw new Error('Insufficient stock for this movement');
+      throw new StockNotEnoughError('Insufficient stock for this movement');
     }
 
     this.stock = new AvailableStock(newStockValue);
     this.updatedAt = new Date();
-    this.movements.push(
-      StockMovement.create(
-        this.productId.getValue(),
-        quantity.getValue(),
-        type,
-      ),
-    );
+    this.movements.push(StockMovement.create(quantity, type));
   }
 }

@@ -1,68 +1,85 @@
 volumes:
-  postgres_data:
-
-networks:
-  my-network:
+  database:
 
 services:
-  zookeeper:
-    image: wurstmeister/zookeeper:latest
-    container_name: zookeeper
+  broker:
+    image: apache/kafka:latest
+    hostname: broker
+    container_name: broker
     ports:
-      - "2181:2181"
-    networks:
-      - my-network
-
-  kafka:
-    image: wurstmeister/kafka:2.13-2.8.1
-    container_name: kafka
+      - 9092:9092
     environment:
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "audit-log:1:1,api-log:1:1"
-    ports:
-      - "9092:9092"
-    depends_on:
-      - zookeeper
-    networks:
-      - my-network
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      KAFKA_LISTENERS: PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
 
   kafka-ui:
     image: kafbat/kafka-ui:latest
+    restart: always
     container_name: kafka-ui
     ports:
       - "8080:8080"
     depends_on:
-      - kafka
+      - broker
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:29092
       DYNAMIC_CONFIG_ENABLED: 'true'
 
   redis:
-    image: redis
-    ports:
-      - "6379:6379"
-
-  postgres-products:
-    image: postgres
+    image: redis/redis-stack:latest
     restart: always
+    ports:
+      - "6379:6379"   # Redis server port
+      - "8001:8001"   # RedisInsight UI port
+      
+  postgres:
+    image: postgres:latest
+    restart: always
+    volumes:
+        - ./postgres/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
+        - database:/var/lib/postgresql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: products
+      POSTGRES_MULTIPLE_DATABASES: products,stocks
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
 
   ms-products:
     build: ./ms-products
+    restart: always
     environment:
-      POSTGRES_DB_HOST: postgres-products
+      POSTGRES_DB_HOST: postgres
       POSTGRES_DB_PORT: 5432
       POSTGRES_DB_USERNAME: postgres
       POSTGRES_DB_PASSWORD: postgres
@@ -71,54 +88,40 @@ services:
       PRODUCTS_DEFAULT_CURRENCY: DOP
       EXCHANGE_RATE_API_URL: https://v6.exchangerate-api.com/v6/
       EXCHANGE_RATE_API_KEY: 00d7d10e5b62944a6091a4b9
-      EVENT_STREAMING_BROKERS: kafka:9092
+      EVENT_STREAMING_BROKERS: broker:29092
       EVENT_STREAMING_CLIENT_ID: ms-products-client
       EVENT_STREAMING_CONSUMER_GROUP_ID: ms-products-group
       CACHE_URL: redis://redis:6379
       JWT_SECRET: my_super_secret_jwt_key
     depends_on:
       - redis
-      - postgres-products
-      - kafka
     ports:
       - "3000:3000"
 
-  postgres-stocks:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: stocks
-    ports:
-      - "5433:5432"
-
   ms-stocks:
     build: ./ms-stocks
+    restart: always
     environment:
-      POSTGRES_DB_HOST: postgres-stocks
-      POSTGRES_DB_PORT: 5433
+      POSTGRES_DB_HOST: postgres
+      POSTGRES_DB_PORT: 5432
       POSTGRES_DB_USERNAME: postgres
       POSTGRES_DB_PASSWORD: postgres
       POSTGRES_DB_NAME: stocks
       POSTGRES_DB_SYNCHRONIZE: true
-      PRODUCTS_DEFAULT_CURRENCY: DOP
-      EXCHANGE_RATE_API_URL: https://v6.exchangerate-api.com/v6/
-      EXCHANGE_RATE_API_KEY: 00d7d10e5b62944a6091a4b9
-      EVENT_STREAMING_BROKERS: kafka:9092
+      EVENT_STREAMING_BROKERS: broker:29092
       EVENT_STREAMING_CLIENT_ID: ms-stocks-client
       EVENT_STREAMING_CONSUMER_GROUP_ID: ms-stocks-group
       CACHE_URL: redis://redis:6379
       JWT_SECRET: my_super_secret_jwt_key
     depends_on:
       - redis
-      - postgres-stocks
-      - kafka
     ports:
       - "3001:3000"
 
+
   auth:
     build: ./auth
+    restart: always
     ports:
       - "3002:3000"
     environment:

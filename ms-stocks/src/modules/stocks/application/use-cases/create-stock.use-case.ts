@@ -1,9 +1,9 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Stock } from '../../domain/entities/stock.entity';
-import { StockCreatedEvent } from '../../domain/events/stock-created.event';
-
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 
+import { StockChangedEvent } from '../../domain/events/stock-changed.event';
+import { CorrelationId } from '../../domain/value-objects/correlation-id.vo';
 import {
   STOCK_EVENT_EMITTER,
   StockEventEmitterPort,
@@ -15,8 +15,8 @@ import {
 } from '../ports/stock.repository.port';
 
 type CreateStockDto = {
-  correlationId: string;
-  productId: string;
+  correlationId: CorrelationId;
+  productId: ProductId;
   productName: string;
 };
 
@@ -44,13 +44,13 @@ export class CreateStockUseCase {
       return;
     }
 
-    const productId = new ProductId(createStockDto.productId);
+    const productId = createStockDto.productId;
 
     const existingStock = await this.stockRepository.findById(productId);
 
     if (existingStock) {
       this.logger?.warn(
-        `Stock with ID ${createStockDto.productId} already exists.`,
+        `Stock with ID ${productId.getValue()} already exists.`,
       );
       return;
     }
@@ -62,12 +62,12 @@ export class CreateStockUseCase {
 
     const savedStock = await this.stockRepository.save(newStock);
 
-    const stockCreatedEvent = new StockCreatedEvent(
+    const stockChangedEvent = new StockChangedEvent(
       createStockDto.correlationId,
       savedStock,
     );
 
-    this.stockEventEmitter.emitStockCreated(stockCreatedEvent);
+    this.stockEventEmitter.emitStockCreated(stockChangedEvent);
     this.logger?.verbose('Stock created successfully:', savedStock);
   }
 }

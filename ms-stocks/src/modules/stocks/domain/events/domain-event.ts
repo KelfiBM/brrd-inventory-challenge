@@ -9,9 +9,9 @@ export abstract class DomainEvent<T> {
   metadata: DomainEventMetadata;
   data: T;
 
-  constructor(correlationId: string, data: T, timestamp?: Date) {
+  constructor(correlationId: CorrelationId, data: T, timestamp?: Date) {
     this.metadata = {
-      correlationId: new CorrelationId(correlationId),
+      correlationId: correlationId,
       timestamp: timestamp || new Date(),
     };
 

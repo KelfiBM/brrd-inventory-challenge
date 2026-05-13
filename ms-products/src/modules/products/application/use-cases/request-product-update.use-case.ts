@@ -3,6 +3,8 @@ import { UpdateProductCommand } from '../../commands/update-product.command';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 
 import { Product } from '../../domain/entities/product.entity';
+import { ProductNotChangedError } from '../../domain/errors/product-not-changed.error';
+import { ProductNotFoundError } from '../../domain/errors/product-not-found.error';
 import { Price } from '../../domain/value-objects/price.vo';
 import { ProductCategory } from '../../domain/value-objects/product-category.vo';
 import {
@@ -30,13 +32,13 @@ export class RequestProductUpdateUseCase {
 
   async execute(requestProductUpdateDto: RequestProductUpdateDto): Promise<ProductId> {
     if (RequestProductUpdateUseCase.areAllFieldsEmpty(requestProductUpdateDto)) {
-      throw new Error('At least one field must be provided for update.');
+      throw new ProductNotChangedError('At least one field must be provided for update.');
     }
 
     const productId = requestProductUpdateDto.id;
     const existingProduct = await this.productRepository.findById(productId);
     if (!existingProduct) {
-      throw new Error(`Product with ID ${productId.getValue()} not found.`);
+      throw new ProductNotFoundError(`Product with ID ${productId.getValue()} not found.`);
     }
 
     if (
@@ -45,7 +47,9 @@ export class RequestProductUpdateUseCase {
         existingProduct
       )
     ) {
-      throw new Error('At least one field must have a different value from the existing product.');
+      throw new ProductNotChangedError(
+        'At least one field must have a different value from the existing product.'
+      );
     }
 
     existingProduct.updateCategories(

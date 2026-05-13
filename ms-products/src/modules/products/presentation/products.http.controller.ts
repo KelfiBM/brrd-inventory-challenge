@@ -1,8 +1,11 @@
 import {
+  BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseBoolPipe,
   Patch,
@@ -17,6 +20,9 @@ import { FindOneProductUseCase } from '../application/use-cases/find-one-product
 import { RequestProductCreationUseCase } from '../application/use-cases/request-product-creation.use-case';
 import { RequestProductDeletionUseCase } from '../application/use-cases/request-product-deletion.use-case';
 import { RequestProductUpdateUseCase } from '../application/use-cases/request-product-update.use-case';
+import { DuplicatedProductError } from '../domain/errors/duplicated-product.error';
+import { ProductNotChangedError } from '../domain/errors/product-not-changed.error';
+import { ProductNotFoundError } from '../domain/errors/product-not-found.error';
 import { Currency } from '../domain/value-objects/currency.vo';
 import { Price } from '../domain/value-objects/price.vo';
 import { ProductCategory } from '../domain/value-objects/product-category.vo';
@@ -28,10 +34,12 @@ import { IdResponseDto } from './dtos/id.response.dto';
 import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
 import { Role } from './enum/role.enum';
 import { AuthGuard } from './guards/auth.guard';
+import { HttpResponseInterceptor } from './interceptors/http-response.interceptor';
 import { ProductIdempotencyInterceptor } from './interceptors/product-idempotency.interceptor';
 
 @Controller(routesV1.version)
 @UseGuards(AuthGuard)
+@UseInterceptors(HttpResponseInterceptor)
 export class ProductsHttpController {
   constructor(
     private readonly requestProductCreationUseCase: RequestProductCreationUseCase,
@@ -47,8 +55,19 @@ export class ProductsHttpController {
   async requestCreate(
     @Body() createProductRequestDto: CreateProductRequestDto
   ): Promise<IdResponseDto> {
-    const productId = await this.requestProductCreationUseCase.execute(createProductRequestDto);
-    return { id: productId.getValue(), message: 'Product creation requested successfully' };
+    try {
+      const productId = await this.requestProductCreationUseCase.execute({
+        ...createProductRequestDto,
+        price: new Price(createProductRequestDto.price),
+        categories: createProductRequestDto.categories.map((cat) => new ProductCategory(cat)),
+      });
+      return { id: productId.getValue(), message: 'Product creation requested successfully' };
+    } catch (error) {
+      if (error instanceof DuplicatedProductError) {
+        throw new ConflictException(error.message);
+      }
+      throw error;
+    }
   }
 
   @UseInterceptors(ProductIdempotencyInterceptor)
@@ -58,24 +77,41 @@ export class ProductsHttpController {
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductRequestDto
   ): Promise<IdResponseDto> {
-    const productId = await this.requestProductUpdateUseCase.execute({
-      id: new ProductId(id),
-      name: updateProductDto.name,
-      description: updateProductDto.description,
-      price: updateProductDto.price ? new Price(updateProductDto.price) : undefined,
-      categories: updateProductDto.categories
-        ? updateProductDto.categories.map((cat) => new ProductCategory(cat))
-        : undefined,
-    });
-    return { id: productId.getValue(), message: 'Product update requested successfully' };
+    try {
+      const productId = await this.requestProductUpdateUseCase.execute({
+        id: new ProductId(id),
+        name: updateProductDto.name,
+        description: updateProductDto.description,
+        price: updateProductDto.price ? new Price(updateProductDto.price) : undefined,
+        categories: updateProductDto.categories
+          ? updateProductDto.categories.map((cat) => new ProductCategory(cat))
+          : undefined,
+      });
+      return { id: productId.getValue(), message: 'Product update requested successfully' };
+    } catch (error) {
+      if (error instanceof ProductNotChangedError) {
+        throw new BadRequestException(error.message);
+      }
+      if (error instanceof ProductNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @UseInterceptors(ProductIdempotencyInterceptor)
   @Roles(Role.Admin)
   @Delete(routesV1.products.delete)
   async removeRequest(@Param('id') id: string) {
-    const productId = await this.requestProductDeletionUseCase.execute({ id: new ProductId(id) });
-    return { id: productId.getValue(), message: 'Product deletion requested successfully' };
+    try {
+      const productId = await this.requestProductDeletionUseCase.execute({ id: new ProductId(id) });
+      return { id: productId.getValue(), message: 'Product deletion requested successfully' };
+    } catch (error) {
+      if (error instanceof ProductNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Get(routesV1.products.root)
@@ -106,20 +142,27 @@ export class ProductsHttpController {
     @Query('priceHistory', new ParseBoolPipe({ optional: true })) priceHistory?: boolean,
     @Query('currency') currency?: string
   ): Promise<FindProductResponseDto> {
-    const product = await this.findOneProductUseCase.execute({
-      id: new ProductId(id),
-      currency: currency ? new Currency(currency) : undefined,
-      includePriceHistory: priceHistory ?? false,
-    });
-    return {
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      categories: product.categories,
-      sku: product.sku,
-      currency: product.currency,
-      priceHistory: product.priceHistory,
-    };
+    try {
+      const product = await this.findOneProductUseCase.execute({
+        id: new ProductId(id),
+        currency: currency ? new Currency(currency) : undefined,
+        includePriceHistory: priceHistory ?? false,
+      });
+      return {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        categories: product.categories,
+        sku: product.sku,
+        currency: product.currency,
+        priceHistory: product.priceHistory,
+      };
+    } catch (error) {
+      if (error instanceof ProductNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 }

@@ -1,8 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { CorrelationId } from '../domain/value-objects/correlation-id.vo';
 
 type CommandMetadata = {
-  correlationId: CorrelationId;
+  correlationId: string;
   timestamp: Date;
 };
 
@@ -12,7 +11,7 @@ export abstract class Command<T> {
 
   constructor(correlationId?: string, timestamp?: Date, data?: T) {
     this.metadata = {
-      correlationId: new CorrelationId(correlationId || randomUUID()),
+      correlationId: correlationId || randomUUID(),
       timestamp: timestamp || new Date(),
     };
     this.data = data;

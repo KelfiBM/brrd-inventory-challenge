@@ -387,13 +387,23 @@ permitiendo realizar operaciones como agregar, actualizar, eliminar y consultar 
   git clone <url-del-proyecto>
 ```
 
-2. Ejecutar docker-compose en la raiz del proyecto
+2. Ejecutar docker-compose en la raíz del proyecto
 
 ```bash
   docker compose up
 ```
 
-3. Ejecutar los endpoints documentos mas adelante
+3. Ejecutar los endpoints documentos más adelante
+
+## Servicios Adicionales y Misceláneos
+
+| Nombre | Path | Descripción |
+|--------|------|-------------|
+| Kafbat | [localhost:8080](localhost:8080) | Kafka UI |
+| Redis Stack | [localhost:8001](localhost:8001) | Redis UI |
+| PgAdmin | [localhost:5050](localhost:5050) | Postgres UI |
+| Postman Collection | `./support-files/postman_collection.json` | Colección de Postman con endpoints y scripts que facilitan las pruebas (como sustitución de token y id de productos creados)
+
 
 ## API Overview
 
@@ -824,9 +834,6 @@ curl --location 'http://localhost:3002/auth/signin' \
   "error": "Your credentials are invalid. Please check your username and password and try again."
 }
 ```
+## Licencias
 
-## Notas
-
-- Dentro de la carpeta `/support-files` existe una colección de Postman con los endpoints agregados y otros features como:
-    - Sustitución del token en la autorización de los endpoints una vez el endpoint de token es consultado (Verificar los roles de usuario)
-    - Sustitución del id del último producto creado en los endpoints correspondientes
+No posee

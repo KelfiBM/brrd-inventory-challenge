@@ -7,12 +7,13 @@ import { DeleteStockUseCase } from '../application/use-cases/delete-stock.use-ca
 import { UpdateStockUseCase } from '../application/use-cases/update-stock.use-case';
 import { CreateStockMovementCommand } from '../commands/create-stock-movement.command';
 import { CommandNames, DomainEventNames } from '../configs/stocks.consts';
-import { Product } from '../domain/entities/product.entity';
-import { DomainEvent } from '../domain/events/domain-event';
+import { CorrelationId } from '../domain/value-objects/correlation-id.vo';
 import { ProductId } from '../domain/value-objects/product-id.vo';
+import { EventRequestDto } from './dtos/event-request.dto';
+import { ProductChangedEventRequestDto } from './dtos/product.event-request.dto';
 
 @Controller(routesV1.version)
-export class ProductsEventController {
+export class StocksEventController {
   constructor(
     private readonly createStockUseCase: CreateStockUseCase,
     private readonly createStockMovementUseCase: CreateStockMovementUseCase,
@@ -22,45 +23,92 @@ export class ProductsEventController {
 
   @EventPattern(DomainEventNames.PRODUCT_CREATED)
   async handleStockCreatedEvent(
-    @Payload() stockCreatedEvent: DomainEvent<Product>,
+    @Payload()
+    productCreatedEvent: EventRequestDto<ProductChangedEventRequestDto>,
   ) {
-    if (!stockCreatedEvent?.data) {
+    if (!productCreatedEvent?.data) {
+      return;
+    }
+    let productId: ProductId;
+    let correlationId: CorrelationId;
+    try {
+      productId = new ProductId(productCreatedEvent.data.id);
+      correlationId = new CorrelationId(
+        productCreatedEvent.metadata.correlationId,
+      );
+    } catch (error) {
+      console.error(
+        'Error creating ProductId or CorrelationId from event data:',
+        error,
+      );
       return;
     }
 
     await this.createStockUseCase.execute({
-      productId: stockCreatedEvent.data.getId().getValue(),
-      productName: stockCreatedEvent.data.getName(),
-      correlationId: stockCreatedEvent.metadata.correlationId.getValue(),
+      productId: productId,
+      productName: productCreatedEvent.data.name,
+      correlationId: correlationId,
     });
   }
 
   @EventPattern(DomainEventNames.PRODUCT_UPDATED)
   async handleStockUpdatedEvent(
-    @Payload() stockUpdatedEvent: DomainEvent<Product>,
+    @Payload()
+    stockUpdatedEvent: EventRequestDto<ProductChangedEventRequestDto>,
   ) {
     if (!stockUpdatedEvent?.data) {
       return;
     }
 
+    let productId: ProductId;
+    let correlationId: CorrelationId;
+    try {
+      productId = new ProductId(stockUpdatedEvent.data.id);
+      correlationId = new CorrelationId(
+        stockUpdatedEvent.metadata.correlationId,
+      );
+    } catch (error) {
+      console.error(
+        'Error creating ProductId or CorrelationId from event data:',
+        error,
+      );
+      return;
+    }
+
     await this.updateStockUseCase.execute({
-      productId: stockUpdatedEvent.data.getId(),
-      productName: stockUpdatedEvent.data.getName(),
-      correlationId: stockUpdatedEvent.metadata.correlationId.getValue(),
+      productId: productId,
+      productName: stockUpdatedEvent.data.name,
+      correlationId: correlationId,
     });
   }
 
   @EventPattern(DomainEventNames.PRODUCT_DELETED)
   async handleStockDeletedEvent(
-    @Payload() stockDeletedEvent: DomainEvent<Product>,
+    @Payload()
+    stockDeletedEvent: EventRequestDto<ProductChangedEventRequestDto>,
   ) {
     if (!stockDeletedEvent?.data) {
       return;
     }
 
+    let productId: ProductId;
+    let correlationId: CorrelationId;
+    try {
+      productId = new ProductId(stockDeletedEvent.data.id);
+      correlationId = new CorrelationId(
+        stockDeletedEvent.metadata.correlationId,
+      );
+    } catch (error) {
+      console.error(
+        'Error creating ProductId or CorrelationId from event data:',
+        error,
+      );
+      return;
+    }
+
     await this.deleteStockUseCase.execute({
-      id: stockDeletedEvent.data.getId(),
-      correlationId: stockDeletedEvent.metadata.correlationId.getValue(),
+      id: productId,
+      correlationId: correlationId,
     });
   }
 
@@ -72,12 +120,27 @@ export class ProductsEventController {
       return;
     }
 
+    let correlationId: CorrelationId;
+    let productId: ProductId;
+    try {
+      correlationId = new CorrelationId(
+        createStockMovementCommand.metadata.correlationId,
+      );
+      productId = new ProductId(createStockMovementCommand.data.productId);
+    } catch (error) {
+      console.error(
+        'Error creating CorrelationId or ProductId from command data:',
+
+        error,
+      );
+      return;
+    }
+
     await this.createStockMovementUseCase.execute({
-      productId: new ProductId(createStockMovementCommand.data.productId),
+      productId: productId,
       movementType: createStockMovementCommand.data.type,
       quantity: createStockMovementCommand.data.quantity,
-      correlationId:
-        createStockMovementCommand.metadata.correlationId.getValue(),
+      correlationId: correlationId,
     });
   }
 }

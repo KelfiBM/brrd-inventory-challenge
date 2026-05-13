@@ -51,18 +51,29 @@ services:
       - "6379:6379"   # Redis server port
       - "8001:8001"   # RedisInsight UI port
       
-
   postgres:
     image: postgres:latest
     restart: always
     volumes:
         - ./postgres/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
+        - database:/var/lib/postgresql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_MULTIPLE_DATABASES: products,stocks
     ports:
       - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
 
   ms-products:
     build: ./ms-products

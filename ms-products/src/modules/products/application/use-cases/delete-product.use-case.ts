@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { ProductDeletedEvent } from '../../domain/events/product-deleted.event';
+import { ProductChangedEvent } from '../../domain/events/product-changed.event';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 import {
   PRODUCT_EVENT_EMITTER,
@@ -45,7 +45,7 @@ export class DeleteProductUseCase {
 
     await this.productRepository.remove(deleteProductDto.id);
 
-    const productDeletedEvent = new ProductDeletedEvent(
+    const productDeletedEvent = new ProductChangedEvent(
       deleteProductDto.correlationId,
       existingProduct
     );

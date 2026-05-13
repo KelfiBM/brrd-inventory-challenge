@@ -3,6 +3,8 @@ import { CreateStockMovementCommand } from '../../commands/create-stock-movement
 import { MovementType } from '../../domain/enums/movement-type.enum';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 
+import { StockNotEnoughError } from '../../domain/errors/stock-not-enough.error';
+import { StockNotFoundError } from '../../domain/errors/stock-not-found.error';
 import {
   STOCK_EVENT_EMITTER,
   StockEventEmitterPort,
@@ -35,7 +37,10 @@ export class RequestStockMovementCreationUseCase {
     );
 
     if (!currentStock) {
-      throw new Error('Product not found');
+      throw new StockNotFoundError(
+        'Stock not found',
+        requestStockMovementCreationDto.productId.getValue(),
+      );
     }
 
     const newStockValue =
@@ -45,7 +50,7 @@ export class RequestStockMovementCreationUseCase {
         : currentStock.getStock().getValue() -
           requestStockMovementCreationDto.amount;
     if (newStockValue < 0) {
-      throw new Error('Insufficient stock for OUT movement');
+      throw new StockNotEnoughError('Insufficient stock for OUT movement');
     }
 
     const createStockMovementCommand = new CreateStockMovementCommand({

@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DeleteProductCommand } from '../../commands/delete-product.command';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 
+import { ProductNotFoundError } from '../../domain/errors/product-not-found.error';
 import {
   PRODUCT_EVENT_EMITTER,
   ProductEventEmitterPort,
@@ -25,7 +26,7 @@ export class RequestProductDeletionUseCase {
     const productId = requestProductDeletionDto.id;
     const existingProduct = await this.productRepository.findById(productId);
     if (!existingProduct) {
-      throw new Error(`Product with ID ${productId.getValue()} not found.`);
+      throw new ProductNotFoundError(`Product with ID ${productId.getValue()} not found.`);
     }
 
     const deleteProductCommand = new DeleteProductCommand({

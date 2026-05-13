@@ -2,8 +2,9 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 
-import { StockUpdatedEvent } from '../../domain/events/stock-updated.event';
+import { StockChangedEvent } from '../../domain/events/stock-changed.event';
 import { AvailableStock } from '../../domain/value-objects/available-stock.vo';
+import { CorrelationId } from '../../domain/value-objects/correlation-id.vo';
 import {
   STOCK_EVENT_EMITTER,
   StockEventEmitterPort,
@@ -15,7 +16,7 @@ import {
 } from '../ports/stock.repository.port';
 
 type CreateStockMovementDto = {
-  correlationId: string;
+  correlationId: CorrelationId;
   productId: ProductId;
   movementType: 'IN' | 'OUT';
   quantity: number;
@@ -63,12 +64,12 @@ export class CreateStockMovementUseCase {
 
     const savedStock = await this.stockRepository.save(existingStock);
 
-    const stockUpdatedEvent = new StockUpdatedEvent(
+    const stockChangedEvent = new StockChangedEvent(
       createStockMovementDto.correlationId,
       savedStock,
     );
 
-    this.stockEventEmitter.emitStockUpdated(stockUpdatedEvent);
+    this.stockEventEmitter.emitStockUpdated(stockChangedEvent);
     this.logger?.verbose('Stock updated successfully:', savedStock);
   }
 }

@@ -6,9 +6,11 @@ import {
   StockCacheRepositoryPort,
 } from '../../../../application/ports/stock.cache-repository.port';
 import { StockRepositoryPort } from '../../../../application/ports/stock.repository.port';
+import { StockMovement } from '../../../../domain/entities/stock-movement.entity';
 import { Stock } from '../../../../domain/entities/stock.entity';
+import { AvailableStock } from '../../../../domain/value-objects/available-stock.vo';
 import { ProductId } from '../../../../domain/value-objects/product-id.vo';
-import { StockDbEntity } from './schema/stock.db-entity';
+import { StockDbEntity } from './db-entities/stock.db-entity';
 
 @Injectable()
 export class TypeOrmStockRepository implements StockRepositoryPort {
@@ -24,42 +26,47 @@ export class TypeOrmStockRepository implements StockRepositoryPort {
     id: ProductId,
     includeStockMovements?: boolean,
   ): Promise<Stock | null> {
-    const getStockFromCache =
-      await this.stockCacheRepository.getStockByProductId(id.getValue());
+    const getStockFromCache = await this.stockCacheRepository.findById(
+      id.getValue(),
+    );
     if (getStockFromCache) {
       return this.mapToDomainEntity(getStockFromCache);
     }
     const stock = await this.stockRepository.findOne({
       where: { productId: id.getValue() } as any,
-      relations: includeStockMovements ? ['stockMovements'] : [],
     });
     if (stock) {
-      const domainStock = this.mapToDomainEntity(stock);
-      await this.stockCacheRepository.setStockByProductId(id.getValue(), stock);
-      return domainStock;
+      if (!includeStockMovements) {
+        stock.stockMovements = [];
+      }
+      await this.stockCacheRepository.save(stock);
+      return this.mapToDomainEntity(stock);
     }
     return null;
   }
   async save(product: Stock): Promise<Stock> {
     const stockDbEntity = this.mapToDbEntity(product);
     const savedStock = await this.stockRepository.save(stockDbEntity);
-    await this.stockCacheRepository.setStockByProductId(
-      savedStock.productId,
-      savedStock,
-    );
+    await this.stockCacheRepository.save(savedStock);
     return this.mapToDomainEntity(savedStock);
   }
   async remove(id: ProductId): Promise<void> {
-    await this.stockRepository.delete({ productId: id.getValue() } as any);
-    await this.stockCacheRepository.removeStockByProductId(id.getValue());
+    await this.stockRepository.delete(id.getValue());
+    await this.stockCacheRepository.remove(id.getValue());
   }
 
   private mapToDomainEntity(stockDbEntity: StockDbEntity): Stock {
     return Stock.create(
-      stockDbEntity.productId,
+      new ProductId(stockDbEntity.productId),
       stockDbEntity.productName,
-      stockDbEntity.stock,
-      stockDbEntity.stockMovements,
+      new AvailableStock(stockDbEntity.stock),
+      stockDbEntity.stockMovements.map((movement) =>
+        StockMovement.create(
+          new AvailableStock(movement.quantity),
+          movement.type as 'IN' | 'OUT',
+          movement.date,
+        ),
+      ),
       stockDbEntity.createdAt,
       stockDbEntity.updatedAt,
     );
@@ -70,7 +77,11 @@ export class TypeOrmStockRepository implements StockRepositoryPort {
     stockDbEntity.productId = stock.getId().getValue();
     stockDbEntity.productName = stock.getName();
     stockDbEntity.stock = stock.getStock().getValue();
-    stockDbEntity.stockMovements = stock.getMovements();
+    stockDbEntity.stockMovements = stock.getMovements().map((movement) => ({
+      quantity: movement.getQuantity().getValue(),
+      type: movement.getType(),
+      date: movement.getMovementDate(),
+    }));
     stockDbEntity.createdAt = stock.getCreatedAt();
     stockDbEntity.updatedAt = stock.getUpdatedAt();
     return stockDbEntity;

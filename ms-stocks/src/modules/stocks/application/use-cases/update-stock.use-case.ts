@@ -1,6 +1,7 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { StockUpdatedEvent } from '../../domain/events/stock-updated.event';
 
+import { StockChangedEvent } from '../../domain/events/stock-changed.event';
+import { CorrelationId } from '../../domain/value-objects/correlation-id.vo';
 import { ProductId } from '../../domain/value-objects/product-id.vo';
 import {
   STOCK_EVENT_EMITTER,
@@ -13,7 +14,7 @@ import {
 } from '../ports/stock.repository.port';
 
 type UpdateStockDto = {
-  correlationId: string;
+  correlationId: CorrelationId;
   productId: ProductId;
   productName: string;
 };
@@ -47,7 +48,7 @@ export class UpdateStockUseCase {
 
     if (!existingStock) {
       this.logger?.warn(
-        `Stock with ID ${updateStockDto.productId.getValue()} does not exist.`,
+        `Stock with Product ID ${updateStockDto.productId.getValue()} does not exist.`,
       );
       return;
     }
@@ -58,14 +59,14 @@ export class UpdateStockUseCase {
 
     await this.stockRepository.save(existingStock);
 
-    const stockUpdatedEvent = new StockUpdatedEvent(
+    const stockUpdatedEvent = new StockChangedEvent(
       updateStockDto.correlationId,
       existingStock,
     );
 
     this.stockEventEmitter.emitStockUpdated(stockUpdatedEvent);
     this.logger?.log(
-      `Stock with ID ${updateStockDto.productId.getValue()} updated successfully.`,
+      `Stock with Product ID ${updateStockDto.productId.getValue()} updated successfully.`,
     );
   }
 }

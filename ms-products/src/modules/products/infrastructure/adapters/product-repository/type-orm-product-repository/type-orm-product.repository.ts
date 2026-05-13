@@ -54,7 +54,7 @@ export class TypeOrmProductRepository implements ProductRepositoryPort {
   }
 
   async findById(id: ProductId, includePriceHistory?: boolean): Promise<Product | null> {
-    const cachedProduct = await this.productCacheRepository.findById(id);
+    const cachedProduct = await this.productCacheRepository.findById(id.getValue());
     if (cachedProduct) {
       return this.toDomainEntity(cachedProduct);
     }
@@ -103,7 +103,7 @@ export class TypeOrmProductRepository implements ProductRepositoryPort {
   }
   async remove(id: ProductId): Promise<void> {
     await this.productRepository.delete(id.getValue());
-    await this.productCacheRepository.remove(id);
+    await this.productCacheRepository.remove(id.getValue());
   }
 
   private toDomainEntities(dbEntities: ProductDbEntity[]): Product[] {

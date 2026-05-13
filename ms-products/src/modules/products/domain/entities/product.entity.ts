@@ -30,7 +30,7 @@ export class Product {
     categories,
     sku,
     currency = new Currency('DOP'),
-    priceHistory = []
+    priceHistory = [],
   }: {
     id: ProductId;
     name: string;

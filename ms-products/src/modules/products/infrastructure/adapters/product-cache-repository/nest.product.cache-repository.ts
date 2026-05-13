@@ -3,7 +3,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { ProductCacheRepositoryPort } from '../../../application/ports/product.cache-repository.port';
 import { CacheKeys } from '../../../configs/products.consts';
-import { ProductId } from '../../../domain/value-objects/product-id.vo';
 import { ProductDbEntity } from '../product-repository/type-orm-product-repository/entities/product.db-entity';
 
 @Injectable()
@@ -29,9 +28,9 @@ export class NestProductCacheRepository implements ProductCacheRepositoryPort {
     await this.cacheManager.set(CacheKeys.PRODUCTS_BY_CATEGORY(category), products, 0);
   }
 
-  async findById(id: ProductId): Promise<ProductDbEntity | null> {
+  async findById(id: string): Promise<ProductDbEntity | null> {
     const value = await this.cacheManager.get<ProductDbEntity>(
-      CacheKeys.PRODUCT_BY_ID(id.getValue())
+      CacheKeys.PRODUCT_BY_ID(id)
     );
     return value || null;
   }
@@ -48,15 +47,15 @@ export class NestProductCacheRepository implements ProductCacheRepositoryPort {
     return product;
   }
 
-  async remove(id: ProductId): Promise<void> {
+  async remove(id: string): Promise<void> {
     await this.cacheManager.del(CacheKeys.ALL_PRODUCTS);
-    const oldProduct = await this.cacheManager.get<ProductDbEntity>(CacheKeys.PRODUCT_BY_ID(id.getValue()));
+    const oldProduct = await this.cacheManager.get<ProductDbEntity>(CacheKeys.PRODUCT_BY_ID(id));
     if (oldProduct) {
       for (const category of oldProduct.categories) {
         await this.cacheManager.del(CacheKeys.PRODUCTS_BY_CATEGORY(category));
       }
     }
-    await this.cacheManager.del(CacheKeys.PRODUCT_BY_ID(id.getValue()));
+    await this.cacheManager.del(CacheKeys.PRODUCT_BY_ID(id));
   }
 
   async getExchangeRateTable(forCurrency: string): Promise<{ [currency: string]: number }> {

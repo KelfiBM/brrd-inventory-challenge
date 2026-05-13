@@ -1,6 +1,6 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Product } from '../../domain/entities/product.entity';
-import { ProductCreatedEvent } from '../../domain/events/product-created.event';
+import { ProductChangedEvent } from '../../domain/events/product-changed.event';
 
 import { CorrelationId } from '../../domain/value-objects/correlation-id.vo';
 import { Currency } from '../../domain/value-objects/currency.vo';
@@ -71,7 +71,7 @@ export class CreateProductUseCase {
     });
     const savedProduct = await this.productRepository.save(newProduct);
 
-    const productCreatedEvent = new ProductCreatedEvent(
+    const productCreatedEvent = new ProductChangedEvent(
       createProductDto.correlationId.getValue(),
       savedProduct
     );

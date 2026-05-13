@@ -1,16 +1,18 @@
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseBoolPipe,
   Patch,
   Post,
   Query,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { routesV1 } from '../../../configs/app.routes';
 import { FindAllProductsUseCase } from '../application/use-cases/find-all-products.use-case';
@@ -19,6 +21,8 @@ import { RequestProductCreationUseCase } from '../application/use-cases/request-
 import { RequestProductDeletionUseCase } from '../application/use-cases/request-product-deletion.use-case';
 import { RequestProductUpdateUseCase } from '../application/use-cases/request-product-update.use-case';
 import { DuplicatedProductError } from '../domain/errors/duplicated-product.error';
+import { ProductNotChangedError } from '../domain/errors/product-not-changed.error';
+import { ProductNotFoundError } from '../domain/errors/product-not-found.error';
 import { Currency } from '../domain/value-objects/currency.vo';
 import { Price } from '../domain/value-objects/price.vo';
 import { ProductCategory } from '../domain/value-objects/product-category.vo';
@@ -73,24 +77,41 @@ export class ProductsHttpController {
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductRequestDto
   ): Promise<IdResponseDto> {
-    const productId = await this.requestProductUpdateUseCase.execute({
-      id: new ProductId(id),
-      name: updateProductDto.name,
-      description: updateProductDto.description,
-      price: updateProductDto.price ? new Price(updateProductDto.price) : undefined,
-      categories: updateProductDto.categories
-        ? updateProductDto.categories.map((cat) => new ProductCategory(cat))
-        : undefined,
-    });
-    return { id: productId.getValue(), message: 'Product update requested successfully' };
+    try {
+      const productId = await this.requestProductUpdateUseCase.execute({
+        id: new ProductId(id),
+        name: updateProductDto.name,
+        description: updateProductDto.description,
+        price: updateProductDto.price ? new Price(updateProductDto.price) : undefined,
+        categories: updateProductDto.categories
+          ? updateProductDto.categories.map((cat) => new ProductCategory(cat))
+          : undefined,
+      });
+      return { id: productId.getValue(), message: 'Product update requested successfully' };
+    } catch (error) {
+      if (error instanceof ProductNotChangedError) {
+        throw new BadRequestException(error.message);
+      }
+      if (error instanceof ProductNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @UseInterceptors(ProductIdempotencyInterceptor)
   @Roles(Role.Admin)
   @Delete(routesV1.products.delete)
   async removeRequest(@Param('id') id: string) {
-    const productId = await this.requestProductDeletionUseCase.execute({ id: new ProductId(id) });
-    return { id: productId.getValue(), message: 'Product deletion requested successfully' };
+    try {
+      const productId = await this.requestProductDeletionUseCase.execute({ id: new ProductId(id) });
+      return { id: productId.getValue(), message: 'Product deletion requested successfully' };
+    } catch (error) {
+      if (error instanceof ProductNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Get(routesV1.products.root)
@@ -121,20 +142,27 @@ export class ProductsHttpController {
     @Query('priceHistory', new ParseBoolPipe({ optional: true })) priceHistory?: boolean,
     @Query('currency') currency?: string
   ): Promise<FindProductResponseDto> {
-    const product = await this.findOneProductUseCase.execute({
-      id: new ProductId(id),
-      currency: currency ? new Currency(currency) : undefined,
-      includePriceHistory: priceHistory ?? false,
-    });
-    return {
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      categories: product.categories,
-      sku: product.sku,
-      currency: product.currency,
-      priceHistory: product.priceHistory,
-    };
+    try {
+      const product = await this.findOneProductUseCase.execute({
+        id: new ProductId(id),
+        currency: currency ? new Currency(currency) : undefined,
+        includePriceHistory: priceHistory ?? false,
+      });
+      return {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        categories: product.categories,
+        sku: product.sku,
+        currency: product.currency,
+        priceHistory: product.priceHistory,
+      };
+    } catch (error) {
+      if (error instanceof ProductNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 }

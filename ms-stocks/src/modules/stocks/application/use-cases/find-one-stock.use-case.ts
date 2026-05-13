@@ -5,6 +5,7 @@ import {
   StockRepositoryPort,
 } from '../ports/stock.repository.port';
 import { FindStockResponse } from '../types/find-stock.response.type';
+import { StockNotFoundError } from '../../domain/errors/stock-not-found.error';
 
 type FindOneStockRequestDto = {
   id: ProductId;
@@ -27,7 +28,7 @@ export class FindOneStockUseCase {
     );
 
     if (!stock) {
-      throw new Error(
+      throw new StockNotFoundError(
         `Product with ID ${findOneStockRequestDto.id.getValue()} not found`,
       );
     }

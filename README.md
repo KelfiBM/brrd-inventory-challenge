@@ -825,6 +825,8 @@ curl --location 'http://localhost:3002/auth/signin' \
 }
 ```
 
-## Licencia
+## Notas
 
-No License
+- Dentro de la carpeta `/support-files` existe una colección de Postman con los endpoints agregados y otros features como:
+    - Sustitución del token en la autorización de los endpoints una vez el endpoint de token es consultado (Verificar los roles de usuario)
+    - Sustitución del id del último producto creado en los endpoints correspondientes

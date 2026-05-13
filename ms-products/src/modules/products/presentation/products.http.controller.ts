@@ -34,11 +34,12 @@ import { IdResponseDto } from './dtos/id.response.dto';
 import { UpdateProductRequestDto } from './dtos/update-product.request.dto';
 import { Role } from './enum/role.enum';
 import { AuthGuard } from './guards/auth.guard';
+import { RolesGuard } from './guards/role.guard';
 import { HttpResponseInterceptor } from './interceptors/http-response.interceptor';
 import { ProductIdempotencyInterceptor } from './interceptors/product-idempotency.interceptor';
 
 @Controller(routesV1.version)
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 @UseInterceptors(HttpResponseInterceptor)
 export class ProductsHttpController {
   constructor(

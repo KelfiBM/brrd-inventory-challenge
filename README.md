@@ -29,11 +29,15 @@ permitiendo realizar operaciones como agregar, actualizar, eliminar y consultar 
 
 ### Patrones y Diseños
 
-- **Microservices**: Segregación de funcionalidades del negocio en servicios independientes
-- **Event-Driven Design**: Comunicación de servicios mediante la emisión y lectura de eventos
-- **Domain Driven Design**: Agrupación de la lógica del negocio por dominios.
-- **Listen to Yourself Pattern**: Lectura de eventos emitidos por sí mismo a una cola de eventos
-- **REST**: Estándar o lineamientos para la construcciones de APIs
+| Nombre | Descripción | Justificación |
+|--------|-------------|---------------|
+| **Microservices** | Segregación de funcionalidades del negocio en servicios independientes | Debido a los requisitos del proyecto, el mismo exige una agrupación de funcionalidades en servicios independientes |
+| **Event-Driven Design** | Comunicación de servicios mediante la emisión y lectura de eventos | Debido a los requisitos del proyecto, este exige una comunicación asíncrónica mediante eventos |
+| **REST** | Estándar o lineamientos para la construcciones de APIs | Debido a los requisitos del proyecto, estos exigen RESTFul APIs |
+| **Domain Driven Design** | Desarrollo en atacar la lógica de negocio como enfoque principal del desarrollo | Principio estándar que facilita la organización del código y su mantenibilidad |
+| **Listen to Yourself Pattern** | Lectura de eventos emitidos por sí mismo a una cola de eventos | Evitar duplicidad de escritura de datos en caso de errores provocados entre la escritura de la base de datos y la emisión de eventos |
+| **Hexagonal Architecture** | Patrón de diseño que busca aislar la lógica de negocio de tecnologías externas | (Podría considerarse overengineering) Buscar independenciar la lógica de negocio en posibles escenarios donde se requiera cambiar dependencias como la base de datos o broker para emisión de eventos |
+
 
 ### Tecnologias
 

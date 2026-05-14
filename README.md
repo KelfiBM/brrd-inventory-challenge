@@ -399,9 +399,9 @@ permitiendo realizar operaciones como agregar, actualizar, eliminar y consultar 
 
 | Nombre | Path | Descripción |
 |--------|------|-------------|
-| Kafbat | [localhost:8080](localhost:8080) | Kafka UI |
-| Redis Stack | [localhost:8001](localhost:8001) | Redis UI |
-| PgAdmin | [localhost:5050](localhost:5050) | Postgres UI |
+| Kafbat | [localhost:8080](http://localhost:8080) | Kafka UI |
+| Redis Stack | [localhost:8001](http://localhost:8001) | Redis UI |
+| PgAdmin | [localhost:5050](http://localhost:5050) | Postgres UI |
 | Postman Collection | `./support-files/postman_collection.json` | Colección de Postman con endpoints y scripts que facilitan las pruebas (como sustitución de token y id de productos creados)
 
 

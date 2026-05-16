@@ -838,6 +838,51 @@ curl --location 'http://localhost:3002/auth/signin' \
   "error": "Your credentials are invalid. Please check your username and password and try again."
 }
 ```
+
+## Pruebas Unitarias
+
+> Dentro de cada proyecto se encuentra un archivo llamado TEST_COVERAGE_REPORT.md que contiene el detalle de las pruebas unitarias de cada proyecto
+
+### ms-products
+
+| Metric                 | Value         | Status |
+| ---------------------- | ------------- | ------ |
+| **Statement Coverage** | 100%          | ✅     |
+| **Branch Coverage**    | 100%          | ✅     |
+| **Function Coverage**  | 100%          | ✅     |
+| **Line Coverage**      | 100%          | ✅     |
+| **Total Test Suites**  | 35            | ✅     |
+| **Total Tests**        | 388           | ✅     |
+| **Failures**           | 0             | ✅     |
+| **Execution Time**     | 15.743s       | ✅     |
+
+### ms-stocks
+
+| Metric                    | Value         | Status |
+| ------------------------- | ------------- | ------ |
+| **Statement Coverage**    | 100%          | ✅ |
+| **Branch Coverage**       | 100%          | ✅ |
+| **Function Coverage**     | 100%          | ✅ |
+| **Line Coverage**         | 100%          | ✅ |
+| **Total Test Suites**     | 25            | ✅ |
+| **Total Test**            | 558           | ✅ |
+| **Failures**              | 0             | ✅ |
+| **Execution Time**        | ~13.2s        | ✅ |
+
+### auth
+
+| Metric                    | Coverage      | Status  |
+| ------------------------- | ------------- | ------- |
+| **Statement Coverage**    | 100%          | ✅ |
+| **Branch Coverage**       | 100%          | ✅ |
+| **Function Coverage**     | 100%          | ✅ |
+| **Line Coverage**         | 100%          | ✅ |
+| **Total Test Suites**     | 3             | ✅ |
+| **Total Test**            | 98            | ✅ |
+| **Failures**              | 0             | ✅ |
+| **Execution Time**        | 3.742s        | ✅ |
+
+
 ## Licencias
 
 No posee

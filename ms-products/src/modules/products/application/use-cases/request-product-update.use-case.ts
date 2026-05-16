@@ -85,16 +85,24 @@ export class RequestProductUpdateUseCase {
     requestProductUpdateDto: RequestProductUpdateDto,
     existingProduct: Product
   ): boolean {
-    return (
-      (requestProductUpdateDto.name !== undefined &&
-        requestProductUpdateDto.name !== existingProduct.getName()) ||
-      (requestProductUpdateDto.description !== undefined &&
-        requestProductUpdateDto.description !== existingProduct.getDescription()) ||
-      (requestProductUpdateDto.price !== undefined &&
-        requestProductUpdateDto.price !== existingProduct.getPrice()) ||
-      (requestProductUpdateDto.categories !== undefined &&
-        JSON.stringify(requestProductUpdateDto.categories) !==
-          JSON.stringify(existingProduct.getCategories()))
-    );
+    if (requestProductUpdateDto.name !== undefined) {
+      if (requestProductUpdateDto.name !== existingProduct.getName()) return true;
+    }
+    if (requestProductUpdateDto.description !== undefined) {
+      if (requestProductUpdateDto.description !== existingProduct.getDescription()) return true;
+    }
+
+    if (requestProductUpdateDto.price !== undefined) {
+      if (!requestProductUpdateDto.price.equals(existingProduct.getPrice())) return true;
+    }
+
+    if (
+      requestProductUpdateDto.categories !== undefined &&
+      JSON.stringify(requestProductUpdateDto.categories) !==
+        JSON.stringify(existingProduct.getCategories())
+    )
+      return true;
+
+    return false;
   }
 }

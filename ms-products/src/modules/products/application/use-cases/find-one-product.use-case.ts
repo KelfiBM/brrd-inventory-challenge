@@ -27,7 +27,10 @@ export class FindOneProductUseCase {
     const product = await this.findProduct(findOneProductRequestDto);
 
     if (!product) {
-      throw new ProductNotFoundError(`Product with ID ${findOneProductRequestDto.id.getValue()} not found.`, findOneProductRequestDto.id.getValue());
+      throw new ProductNotFoundError(
+        `Product with ID ${findOneProductRequestDto.id.getValue()} not found.`,
+        findOneProductRequestDto.id.getValue()
+      );
     }
 
     if (findOneProductRequestDto.currency) {
@@ -41,7 +44,9 @@ export class FindOneProductUseCase {
     return response;
   }
 
-  private async findProduct(findOneProductRequestDto: FindOneProductRequestDto): Promise<Product | null> {
+  private async findProduct(
+    findOneProductRequestDto: FindOneProductRequestDto
+  ): Promise<Product | null> {
     const product = await this.productRepository.findById(
       findOneProductRequestDto.id,
       findOneProductRequestDto.includePriceHistory
@@ -69,7 +74,6 @@ export class FindOneProductUseCase {
           price: entry.price.getValue(),
           date: entry.changedAt,
         }));
-    const hasPriceHistory = priceHistoryEntries.length > 0;
 
     return {
       currency: currencyValue,
@@ -79,7 +83,7 @@ export class FindOneProductUseCase {
       id: product.getId().getValue(),
       description: product.getDescription(),
       price: priceValue,
-      priceHistory: hasPriceHistory ? priceHistoryEntries : undefined,
+      priceHistory: priceHistoryEntries,
     };
   }
 

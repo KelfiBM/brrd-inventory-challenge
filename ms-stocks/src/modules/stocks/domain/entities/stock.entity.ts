@@ -10,7 +10,7 @@ export class Stock {
     private stock: AvailableStock,
     private readonly createdAt: Date,
     private updatedAt: Date,
-    private readonly movements: StockMovement[] = [],
+    private readonly movements: StockMovement[],
   ) {}
 
   static create(

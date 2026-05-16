@@ -30,7 +30,7 @@ export class ProductsEventController {
     let categories: ProductCategory[];
     let id: ProductId;
     let correlationId: CorrelationId;
-    
+
     try {
       price = new Price(createProductCommand.data.price);
       categories = createProductCommand.data.categories.map((cat) => new ProductCategory(cat));
@@ -41,15 +41,19 @@ export class ProductsEventController {
       console.error('Error handling CreateProductCommand:', error);
       return;
     }
-    await this.createProductUseCase.execute({
-      name: createProductCommand.data.name,
-      description: createProductCommand.data.description,
-      price: price,
-      categories: categories,
-      sku: createProductCommand.data.sku,
-      id: id,
-      correlationId: correlationId,
-    });
+    try {
+      await this.createProductUseCase.execute({
+        name: createProductCommand.data.name,
+        description: createProductCommand.data.description,
+        price: price,
+        categories: categories,
+        sku: createProductCommand.data.sku,
+        id: id,
+        correlationId: correlationId,
+      });
+    } catch (error) {
+      console.error('Error executing CreateProductCommand use case:', error);
+    }
   }
 
   @EventPattern(CommandNames.UPDATE_PRODUCT)
@@ -74,9 +78,13 @@ export class ProductsEventController {
       return;
     }
 
-    await this.deleteProductUseCase.execute({
-      id: new ProductId(deleteProductCommand.data.id),
-      correlationId: deleteProductCommand.metadata.correlationId,
-    });
+    try {
+      await this.deleteProductUseCase.execute({
+        id: new ProductId(deleteProductCommand.data.id),
+        correlationId: deleteProductCommand.metadata.correlationId,
+      });
+    } catch (error) {
+      console.error('Error executing DeleteProductCommand use case:', error);
+    }
   }
 }

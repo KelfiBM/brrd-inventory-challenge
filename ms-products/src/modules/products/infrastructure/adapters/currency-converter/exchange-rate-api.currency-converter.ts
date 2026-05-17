@@ -37,7 +37,7 @@ export class ExchangeRateApiCurrencyConverter implements CurrencyConverterPort {
   private async getExchangeRateTable(forCurrency: string): Promise<Record<string, number>> {
     if (this.cacheRepository) {
       const cachedRates = await this.cacheRepository.getExchangeRateTable(forCurrency);
-      if (cachedRates) {
+      if (cachedRates && Object.keys(cachedRates).length > 0) {
         return cachedRates;
       }
     }
@@ -49,7 +49,7 @@ export class ExchangeRateApiCurrencyConverter implements CurrencyConverterPort {
           throw error;
         })
       )
-    );
+    );    
 
     if (this.cacheRepository) {
       try {

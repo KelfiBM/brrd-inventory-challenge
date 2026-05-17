@@ -17,7 +17,7 @@ export class Product {
     private readonly currency: Currency,
     private categories: ProductCategory[],
     private readonly sku: string,
-    private readonly priceHistory: PriceHistoryEntry[] = [],
+    private readonly priceHistory: PriceHistoryEntry[],
     private readonly createdAt: Date,
     private updatedAt: Date
   ) {}

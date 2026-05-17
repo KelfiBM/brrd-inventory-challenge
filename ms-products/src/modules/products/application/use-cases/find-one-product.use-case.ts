@@ -11,7 +11,7 @@ import { FindProductResponse } from '../types/find-product.response.type';
 type FindOneProductRequestDto = {
   id: ProductId;
   currency?: Currency;
-  includePriceHistory?: boolean;
+  includePriceHistory: boolean;
 };
 
 @Injectable()
@@ -34,7 +34,7 @@ export class FindOneProductUseCase {
     }
 
     if (findOneProductRequestDto.currency) {
-      return this.convertCurrency(product, findOneProductRequestDto.currency);
+      return this.convertCurrency(product, findOneProductRequestDto.currency, findOneProductRequestDto.includePriceHistory);
     }
 
     const response = this.mapResponse(product);
@@ -89,7 +89,8 @@ export class FindOneProductUseCase {
 
   private async convertCurrency(
     product: Product,
-    targetCurrency: Currency
+    targetCurrency: Currency,
+    includePriceHistory: boolean
   ): Promise<FindProductResponse> {
     const mainPrice = new Price(
       await this.currencyConverter.convert(
@@ -98,6 +99,12 @@ export class FindOneProductUseCase {
         targetCurrency
       )
     );
+
+    if (!includePriceHistory) {
+      const response = this.mapResponse(product, targetCurrency, mainPrice);
+      response.priceHistory = undefined;
+      return response;
+    }
 
     const priceHistory = await Promise.all(
       product.getPriceHistory().map(async (entry) => ({
